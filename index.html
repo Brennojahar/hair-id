@@ -1142,7 +1142,17 @@ function receberArquivos(list){
     const url = URL.createObjectURL(f);
     const img = new Image();
     const item = { file:f, url:url, img:img };
-    img.onload = () => { desenharPainel(); abrirLupa(); };
+    img.onload = async () => {
+      desenharPainel(); abrirLupa();
+      if (fotos[0] === item) autoStatus("Recortando o fundo… na primeira vez o modelo baixa (~16 MB) e depois fica em cache.");
+      await prepararRecorte(item);
+      if (fotos[0] === item){
+        abrirLupa(); desenharPainel();
+        autoStatus(item.erroRecorte
+          ? "Não consegui recortar o fundo — sigo com a foto original. Clique em Ler rosto e cores."
+          : "Fundo recortado. Clique em Ler rosto e cores.", Boolean(item.erroRecorte));
+      }
+    };
     img.src = url;
     fotos.push(item);
   }
@@ -1169,6 +1179,92 @@ $("file").addEventListener("change", ev => { receberArquivos(ev.target.files); e
 ["dragleave","drop"].forEach(t => $("drop").addEventListener(t, ev => { ev.preventDefault(); $("drop").classList.remove("over"); }));
 $("drop").addEventListener("drop", ev => receberArquivos(ev.dataTransfer.files));
 
+/* ==================== recorte da pessoa em fundo branco ==================== */
+/* classes do segmentador: 0 fundo · 1 cabelo · 2 pele do corpo · 3 pele do rosto · 4 roupa · 5 acessórios */
+const CLASSE = { FUNDO:0, CABELO:1, PELE_CORPO:2, PELE_ROSTO:3, ROUPA:4 };
+
+async function prepararRecorte(item){
+  const LARG = 560;
+  const H = Math.max(1, Math.round(LARG * item.img.naturalHeight / item.img.naturalWidth));
+  const bruto = document.createElement("canvas");
+  bruto.width = LARG; bruto.height = H;
+  bruto.getContext("2d", { willReadFrequently:true }).drawImage(item.img, 0, 0, LARG, H);
+  item.recorte = bruto; item.mascara = null;
+
+  let seg;
+  try { seg = await window.__hairIdSegmenter(); }
+  catch(err){ item.erroRecorte = "modelo"; return item; }
+
+  let cat;
+  try {
+    const r = seg.segment(bruto);
+    const m = r.categoryMask;
+    cat = { data: new Uint8Array(m.getAsUint8Array()), w: m.width, h: m.height };
+    r.close();
+  } catch(err){ item.erroRecorte = "segmentacao"; return item; }
+
+  let pessoa = 0;
+  for (let i = 0; i < cat.data.length; i++) if (cat.data[i] !== CLASSE.FUNDO) pessoa++;
+  if (pessoa / cat.data.length < 0.06){ item.erroRecorte = "vazio"; return item; }
+
+  const alfa = document.createElement("canvas");
+  alfa.width = LARG; alfa.height = H;
+  const ac = alfa.getContext("2d");
+  const id = ac.createImageData(LARG, H);
+  for (let y = 0; y < H; y++){
+    const my = Math.min(cat.h-1, (y * cat.h / H) | 0);
+    for (let x = 0; x < LARG; x++){
+      const mx = Math.min(cat.w-1, (x * cat.w / LARG) | 0);
+      const i = (y*LARG + x) * 4;
+      id.data[i] = id.data[i+1] = id.data[i+2] = 255;
+      id.data[i+3] = cat.data[my*cat.w + mx] === CLASSE.FUNDO ? 0 : 255;
+    }
+  }
+  ac.putImageData(id, 0, 0);
+
+  const tmp = document.createElement("canvas");
+  tmp.width = LARG; tmp.height = H;
+  const tc = tmp.getContext("2d");
+  tc.filter = "blur(1.1px)";
+  tc.drawImage(alfa, 0, 0);
+  tc.filter = "none";
+  tc.globalCompositeOperation = "source-in";
+  tc.drawImage(bruto, 0, 0);
+
+  const saida = document.createElement("canvas");
+  saida.width = LARG; saida.height = H;
+  const oc = saida.getContext("2d", { willReadFrequently:true });
+  oc.fillStyle = "#FFFFFF"; oc.fillRect(0, 0, LARG, H);
+  oc.drawImage(tmp, 0, 0);
+
+  item.recorte = saida;
+  item.mascara = cat;
+  item.erroRecorte = null;
+  return item;
+}
+
+/* cor mediana de uma classe da máscara, descartando sombra e reflexo */
+function corDaClasse(item, classe, minimo){
+  if (!item || !item.mascara || !limpo) return null;
+  const cat = item.mascara, W = limpo.width, H = limpo.height;
+  const px = limpo.getContext("2d", { willReadFrequently:true }).getImageData(0, 0, W, H).data;
+  const lista = [];
+  for (let y = 1; y < H-1; y += 2){
+    const my = Math.min(cat.h-1, (y * cat.h / H) | 0);
+    for (let x = 1; x < W-1; x += 2){
+      const mx = Math.min(cat.w-1, (x * cat.w / W) | 0);
+      if (cat.data[my*cat.w + mx] !== classe) continue;
+      const i = (y*W + x) * 4;
+      lista.push({ r:px[i], g:px[i+1], b:px[i+2], x, y, L:rgbParaLab(px[i],px[i+1],px[i+2]).L });
+    }
+  }
+  if (lista.length < (minimo || 60)) return null;
+  lista.sort((a,b) => a.L - b.L);
+  const corte = Math.floor(lista.length * 0.22);
+  const meio = lista.slice(corte, lista.length - corte);
+  return meio.length ? meio[Math.floor(meio.length/2)] : null;
+}
+
 /* ==================== colorimetria: medir a foto ==================== */
 const AM = { pele:null, cabelo:null, olhos:null, neutro:null };
 let armado = null, limpo = null;
@@ -1193,12 +1289,14 @@ function abrirLupa(){
   const f = fotos[0];
   $("medir").hidden = !f;
   if (!f || !f.img.complete || !f.img.naturalWidth) return;
-  const cv = $("lupa"), W = 560;
-  const H = Math.max(1, Math.round(W * f.img.naturalHeight / f.img.naturalWidth));
+  const fonte = f.recorte || f.img;
+  const W = fonte.width || 560;
+  const H = fonte.height || Math.max(1, Math.round(560 * f.img.naturalHeight / f.img.naturalWidth));
+  const cv = $("lupa");
   cv.width = W; cv.height = H;
   limpo = document.createElement("canvas");
   limpo.width = W; limpo.height = H;
-  limpo.getContext("2d", { willReadFrequently:true }).drawImage(f.img, 0, 0, W, H);
+  limpo.getContext("2d", { willReadFrequently:true }).drawImage(fonte, 0, 0, W, H);
   redesenharLupa();
 }
 function redesenharLupa(){
@@ -1212,8 +1310,8 @@ function redesenharLupa(){
     ctx.strokeStyle = "#000000"; ctx.lineWidth = 1.4; ctx.stroke();
   });
 }
-function amostrar(x, y){
-  const ctx = limpo.getContext("2d", { willReadFrequently:true }), n = 5;
+function amostrar(x, y, raio){
+  const ctx = limpo.getContext("2d", { willReadFrequently:true }), n = raio || 5;
   const x0 = trava(x-n, 0, limpo.width-1), y0 = trava(y-n, 0, limpo.height-1);
   const w = Math.min(n*2+1, limpo.width-x0), h = Math.min(n*2+1, limpo.height-y0);
   const d = ctx.getImageData(x0, y0, w, h).data;
@@ -1389,6 +1487,7 @@ async function lerRosto(){
   const dir  = { x:(topo.x-queixo.x)/comprimento, y:(topo.y-queixo.y)/comprimento };
   const perp = { x:-dir.y, y:dir.x };
   const peleLab0 = rgbParaLab(AM.pele.r, AM.pele.g, AM.pele.b);
+  const daMascara = corDaClasse(fotos[0], CLASSE.CABELO, 80);
   const achados = [];
   for (const lat of [-0.34, -0.17, 0, 0.17, 0.34]){
     for (let k = 0.03; k <= 0.46; k += 0.025){
@@ -1400,8 +1499,9 @@ async function lerRosto(){
       if (Math.hypot(lab.L-peleLab0.L, lab.a-peleLab0.a, lab.b-peleLab0.b) > 20){ achados.push(a); break; }
     }
   }
-  AM.cabelo = medianaPorL(achados) || medianaPorL([amostrar(
+  AM.cabelo = daMascara || medianaPorL(achados) || medianaPorL([amostrar(
     Math.round(topo.x + dir.x*comprimento*0.14), Math.round(topo.y + dir.y*comprimento*0.14))]);
+  const origemCabelo = daMascara ? "máscara" : "varredura";
 
   /* --- íris: anel em volta do centro, sem pupila nem reflexo --- */
   let avisoIris = false;
@@ -1415,11 +1515,22 @@ async function lerRosto(){
     const meio = anel.slice(1, Math.max(2, anel.length-1));
     AM.olhos = meio.length ? meio[Math.floor(meio.length/2)].p : null;
 
-    /* --- esclera como referência neutra --- */
-    const canto = pt(lm,33,W,H);
-    const es = amostrar(Math.round(c.x + (canto.x-c.x)*0.62), Math.round(c.y + (canto.y-c.y)*0.62));
-    const esLab = rgbParaLab(es.r, es.g, es.b);
-    AM.neutro = (esLab.L > 45 && croma(esLab) < 14) ? es : null;
+    /* --- esclera como referência neutra: testa os dois olhos --- */
+    const olhos = [[468,33],[473,263]];
+    let melhorEs = null;
+    for (const [iCentro, iCanto] of olhos){
+      if (iCentro >= lm.length || iCanto >= lm.length) continue;
+      const ce = pt(lm,iCentro,W,H), canto = pt(lm,iCanto,W,H);
+      for (const k of [0.55, 0.70]){
+        const q = { x: Math.round(ce.x + (canto.x-ce.x)*k), y: Math.round(ce.y + (canto.y-ce.y)*k) };
+        if (!dentro(q,W,H)) continue;
+        const es = amostrar(q.x, q.y, 2);
+        const esLab = rgbParaLab(es.r, es.g, es.b);
+        if (esLab.L > 40 && croma(esLab) < 18 && (!melhorEs || croma(esLab) < melhorEs.c))
+          melhorEs = { a:es, c:croma(esLab) };
+      }
+    }
+    AM.neutro = melhorEs ? melhorEs.a : null;
   } else avisoIris = true;
 
   if (!AM.olhos){ avisoIris = true; AM.olhos = AM.pele; }
@@ -1440,6 +1551,7 @@ async function lerRosto(){
 
   const avisos = [];
   if (dE < 13) avisos.push("a amostra de cabelo saiu parecida demais com a pele — confira se ela caiu no fio mesmo");
+  if (origemCabelo === "varredura" && fotos[0] && fotos[0].mascara) avisos.push("não isolei a massa de cabelo na máscara");
   if (avisoIris) avisos.push("não consegui isolar a íris; confira a amostra dos olhos");
   if (!AM.neutro) avisos.push("não achei esclera limpa para corrigir a luz, então o subtom depende do balanço de branco da foto");
   autoStatus(avisos.length
@@ -1625,10 +1737,11 @@ function pontos(ctx, lista, x, y, r){
   });
 }
 function cobrir(ctx, img, x, y, w, h){
-  const ir = img.naturalWidth / img.naturalHeight, br = w / h;
+  const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+  const ir = iw / ih, br = w / h;
   let sw, sh, sx, sy;
-  if (ir > br){ sh = img.naturalHeight; sw = sh * br; sx = (img.naturalWidth - sw)/2; sy = 0; }
-  else { sw = img.naturalWidth; sh = sw / br; sx = 0; sy = (img.naturalHeight - sh) * 0.28; }
+  if (ir > br){ sh = ih; sw = sh * br; sx = (iw - sw)/2; sy = 0; }
+  else { sw = iw; sh = sw / br; sx = 0; sy = (ih - sh) * 0.28; }
   ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
   ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
   ctx.restore();
@@ -1685,7 +1798,8 @@ function desenharPainel(){
   });
 
   const f0 = fotos[0];
-  if (f0 && f0.img && f0.img.complete && f0.img.naturalWidth) cobrir(ctx, f0.img, fotoX, 130, R - fotoX, 380);
+  const fonteFoto = f0 && (f0.recorte || (f0.img && f0.img.complete && f0.img.naturalWidth ? f0.img : null));
+  if (fonteFoto) cobrir(ctx, fonteFoto, fotoX, 130, R - fotoX, 380);
   else {
     ctx.fillStyle = "#F4F2EE"; ctx.fillRect(fotoX, 130, R - fotoX, 380);
     ctx.font = "400 12px " + F_ARCH; ctx.fillStyle = B_MUT; ctx.textAlign = "center";
@@ -1782,11 +1896,26 @@ abrirLupa();
 
 </script>
 <script type="module">
-import { FilesetResolver, FaceLandmarker } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/vision_bundle.mjs";
-let pronto = null;
+import { FilesetResolver, FaceLandmarker, ImageSegmenter } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/vision_bundle.mjs";
+let base = null, pronto = null, recortador = null;
+const fileset = () => base || (base = FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm"));
+
+window.__hairIdSegmenter = function(){
+  if (!recortador) recortador = (async () => {
+    const fs = await fileset();
+    return await ImageSegmenter.createFromOptions(fs, {
+      baseOptions: { modelAssetPath: "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_multiclass_256x256/float32/latest/selfie_multiclass_256x256.tflite" },
+      runningMode: "IMAGE",
+      outputCategoryMask: true,
+      outputConfidenceMasks: false
+    });
+  })();
+  return recortador;
+};
+
 window.__hairIdVision = function(){
   if (!pronto) pronto = (async () => {
-    const fs = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm");
+    const fs = await fileset();
     return await FaceLandmarker.createFromOptions(fs, {
       baseOptions: { modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task" },
       runningMode: "IMAGE",
