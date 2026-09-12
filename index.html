@@ -370,6 +370,32 @@ footer strong{color:var(--ink-2);font-weight:500}
           </div>
           <p class="privacy" id="axesOrigem" style="margin-top:12px"></p>
 
+          <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--rule)">
+            <h3 style="margin-bottom:12px">Identidade — o que a foto não diz</h3>
+            <p class="privacy" style="margin-bottom:12px">Sugerido pelo temperamento lido; ajuste conversando com a cliente. Vai para a seção 1 do dossiê.</p>
+            <div class="picks">
+              <div class="field"><label for="fEssencia">Essência</label><input type="text" id="fEssencia"></div>
+              <div class="field"><label for="fEstilo">Estilo predominante</label><input type="text" id="fEstilo"></div>
+              <div class="field"><label for="fPersona">Personalidade da imagem</label><input type="text" id="fPersona"></div>
+              <div class="field"><label for="fMensagem">Mensagem a transmitir</label><input type="text" id="fMensagem"></div>
+              <div class="field">
+                <label for="selCabeloTipo">Tipo de fio</label>
+                <div class="sel-wrap"><select id="selCabeloTipo">
+                  <option value="liso">Liso</option><option value="ondulado">Ondulado</option>
+                  <option value="cacheado">Cacheado</option><option value="crespo">Crespo</option>
+                </select></div>
+              </div>
+              <div class="field">
+                <label for="selSilhueta">Silhueta</label>
+                <div class="sel-wrap"><select id="selSilhueta">
+                  <option value="ampulheta">Ampulheta</option><option value="triangulo-invertido">Triângulo invertido</option>
+                  <option value="retangulo">Retângulo</option><option value="oval">Oval</option>
+                  <option value="triangulo">Triângulo</option>
+                </select></div>
+              </div>
+            </div>
+          </div>
+
           <div id="leituraIA" hidden style="margin-top:18px;padding-top:16px;border-top:1px solid var(--rule)">
             <h3 style="margin-bottom:10px">O que foi medido</h3>
             <dl id="leituraIAlist"></dl>
@@ -475,7 +501,8 @@ footer strong{color:var(--ink-2);font-weight:500}
         <div class="board-side">
           <p>O painel se refaz a cada mudança no diagnóstico. A foto entra no quadro 01 — sem foto, o quadro fica só com o nome e a estação.</p>
           <div class="toolbar">
-            <button type="button" class="primary" id="btnBaixar">Baixar PNG</button>
+            <button type="button" class="primary" id="btnDossie">Baixar dossiê (PDF A4)</button>
+            <button type="button" id="btnBaixar">Baixar painel (PNG)</button>
             <button type="button" id="btnCopiarTudo">Copiar dossiê em texto</button>
             <button type="button" onclick="window.print()">Imprimir ficha completa</button>
           </div>
@@ -842,8 +869,27 @@ const TEMPERAMENTOS = {
 
 /* ============================ estado ============================ */
 const SALAO = "Hair ID";
+const IDENTIDADE = {
+  sanguineo:{ essencia:"Expansiva, calorosa e expressiva", estilo:"Contemporâneo com movimento",
+    persona:"Comunicativa, magnética e criativa", mensagem:"Energia, proximidade e leveza" },
+  colerico:{ essencia:"Objetiva, forte e decidida", estilo:"Estruturado e contemporâneo",
+    persona:"Confiante, direta e determinada", mensagem:"Segurança, autoridade e clareza" },
+  melancolico:{ essencia:"Sensível, refinada e detalhista", estilo:"Clássico contemporâneo com delicadeza",
+    persona:"Introspectiva, elegante e criativa", mensagem:"Sofisticação, profundidade e cuidado" },
+  fleumatico:{ essencia:"Serena, natural e constante", estilo:"Natural contemporâneo",
+    persona:"Acessível, confiável e equilibrada", mensagem:"Leveza, autenticidade e naturalidade" }
+};
+const CAMPOS_ID = { fEssencia:"essencia", fEstilo:"estilo", fPersona:"persona", fMensagem:"mensagem" };
+let identidadeTocada = {};
+
+function sugerirIdentidade(){
+  const base = IDENTIDADE[state.temp] || IDENTIDADE.fleumatico;
+  Object.entries(CAMPOS_ID).forEach(([id, chave]) => {
+    if (!identidadeTocada[id]) $(id).value = base[chave];
+  });
+}
 const PADRAO = { estacao:"verao-suave", rosto:"oval", temp:"melancolico", temp2:"fleumatico" };
-const state = Object.assign({ exemplo:true, eixosIA:null, leitura:null }, PADRAO);
+const state = Object.assign({ exemplo:true, eixosIA:null, leitura:null, geo:null, fio:"liso", silhueta:"ampulheta" }, PADRAO);
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -967,6 +1013,7 @@ function render(){
   ]);
 
   buildPrompts(e, r, t, t2, nome);
+  sugerirIdentidade();
   desenharPainel();
 }
 
@@ -1035,6 +1082,13 @@ fillSelect($("selTemp2"),   TEMPERAMENTOS, state.temp2, v => state.temp2 = v);
 ["fCliente","fData"].forEach(id =>
   $(id).addEventListener("input", () => { marcarEditado(); render(); }));
 
+Object.keys(CAMPOS_ID).forEach(id => $(id).addEventListener("input", () => {
+  identidadeTocada[id] = $(id).value.trim().length > 0;
+  marcarEditado();
+}));
+["selCabeloTipo","selSilhueta"].forEach(id =>
+  $(id).addEventListener("change", () => { state[id === "selCabeloTipo" ? "fio" : "silhueta"] = $(id).value; marcarEditado(); }));
+
 function marcarEditado(){
   if (state.exemplo){ state.exemplo = false; $("exampleBadge").style.display = "none"; }
 }
@@ -1046,6 +1100,10 @@ $("btnNova").addEventListener("click", () => {
   limparFotos();
 
   Object.assign(state, PADRAO);
+  identidadeTocada = {};
+  state.geo = null;
+  $("selCabeloTipo").value = "liso"; state.fio = "liso";
+  $("selSilhueta").value = "ampulheta"; state.silhueta = "ampulheta";
   state.eixosIA = null;
   state.leitura = null;
   state.exemplo = true;
@@ -1482,6 +1540,7 @@ async function lerRosto(){
   const ang = Math.acos((v1.x*v2.x + v1.y*v2.y) / (Math.hypot(v1.x,v1.y)*Math.hypot(v2.x,v2.y) || 1)) * 180/Math.PI;
   const g = { R: comprimento/macas, tF: testa/macas, tJ: mandib/macas, ang };
 
+  state.geo = g;
   const fr = formatoDoRosto(g), tp = temperamentoDoRosto(g);
   state.rosto = fr[0][0]; $("selRosto").value = fr[0][0];
   state.temp  = tp[0][0]; $("selTemp").value  = tp[0][0];
@@ -1570,6 +1629,491 @@ async function lerRosto(){
 }
 $("btnAuto").addEventListener("click", lerRosto);
 
+
+/* ==================== dossiê A4 em PDF ==================== */
+const A4 = { w:1654, h:2339, m:96 };                  /* 210x297mm a 200dpi */
+const D = {
+  creme:"#F7F3EC", carta:"#FFFFFF", fio:"#E6DED0", fioForte:"#CFC3AE",
+  tinta:"#2E2620", suave:"#6E6152", acento:"#8A6A45", faixa:"#4A3A2C"
+};
+const FS = '"Bodoni Moda", Georgia, serif';
+const FA = '"Archivo", Arial, sans-serif';
+const FM = '"IBM Plex Mono", monospace';
+
+function paginaNova(){
+  const cv = document.createElement("canvas");
+  cv.width = A4.w; cv.height = A4.h;
+  const c = cv.getContext("2d");
+  c.fillStyle = D.creme; c.fillRect(0,0,A4.w,A4.h);
+  c.textBaseline = "alphabetic";
+  return { cv, c };
+}
+function cartao(c, x, y, w, h){
+  c.fillStyle = D.carta; c.fillRect(x,y,w,h);
+  c.strokeStyle = D.fio; c.lineWidth = 1.5; c.strokeRect(x+.75,y+.75,w-1.5,h-1.5);
+}
+function tituloSecao(c, num, txt, x, y, larg){
+  c.font = "400 22px " + FS; c.fillStyle = D.acento;
+  c.fillText(num + ".", x, y);
+  c.font = "600 16px " + FA; c.fillStyle = D.tinta;
+  c.letterSpacing = "2.4px"; c.fillText(txt.toUpperCase(), x + 34, y); c.letterSpacing = "0px";
+  c.strokeStyle = D.fio; c.lineWidth = 1;
+  c.beginPath(); c.moveTo(x, y+14.5); c.lineTo(x+larg, y+14.5); c.stroke();
+}
+function rot(c, txt, x, y, cor, tam){
+  c.font = "600 " + (tam||11) + "px " + FA; c.fillStyle = cor || D.suave;
+  c.letterSpacing = "1.6px"; c.fillText(txt.toUpperCase(), x, y); c.letterSpacing = "0px";
+}
+function par(c, rotulo, valor, x, y, larg){
+  rot(c, rotulo, x, y);
+  c.font = "400 15px " + FA; c.fillStyle = D.tinta;
+  return txt(c, valor, x, y+22, larg, 20, 3) + 12;
+}
+function txt(c, t, x, y, maxW, lh, max){
+  let ls = linhas(c, t, maxW);
+  if (max && ls.length > max){
+    ls = ls.slice(0,max);
+    let u = ls[max-1];
+    while (u && c.measureText(u+"…").width > maxW) u = u.slice(0,-1).trim();
+    ls[max-1] = u+"…";
+  }
+  ls.forEach((l,i) => c.fillText(l, x, y + i*lh));
+  return y + ls.length*lh;
+}
+function bullets(c, itens, x, y, larg){
+  c.font = "400 14px " + FA;
+  itens.forEach(it => {
+    c.fillStyle = D.acento; c.fillText("·", x, y);
+    c.fillStyle = D.tinta;
+    y = txt(c, it, x+14, y, larg-14, 19, 2) + 5;
+  });
+  return y;
+}
+function faixaCores(c, titulo, lista, x, y, larg, maxLado){
+  rot(c, titulo, x, y);
+  const n = lista.length, gap = 10;
+  const lado = Math.min(maxLado || 46, (larg - (n-1)*gap) / n);
+  lista.forEach(([hex], i) => {
+    c.fillStyle = hex;
+    c.fillRect(x + i*(lado+gap), y+10, lado, lado);
+    c.strokeStyle = "#00000038"; c.lineWidth = 1;
+    c.strokeRect(x + i*(lado+gap) + .5, y+10.5, lado-1, lado-1);
+  });
+  return y + lado + 34;
+}
+function vagaFoto(c, x, y, w, h, legenda){
+  c.fillStyle = "#FBF8F3"; c.fillRect(x,y,w,h);
+  c.strokeStyle = D.fioForte; c.lineWidth = 1.2;
+  c.setLineDash([5,4]); c.strokeRect(x+.6,y+.6,w-1.2,h-1.2); c.setLineDash([]);
+  c.font = "400 11px " + FA; c.fillStyle = "#A79880";
+  c.textAlign = "center";
+  c.fillText("foto da cliente", x+w/2, y+h/2 - 2);
+  c.font = "400 10px " + FA;
+  c.fillText("(a gerar)", x+w/2, y+h/2 + 14);
+  c.textAlign = "left";
+  if (legenda){
+    c.font = "500 12px " + FA; c.fillStyle = D.tinta; c.textAlign = "center";
+    c.fillText(legenda, x+w/2, y+h+18); c.textAlign = "left";
+  }
+}
+function comboCor(c, x, y, w, h, cores, rotulo){
+  cartao(c, x, y, w, h);
+  const faixa = (h-16) / cores.length;
+  cores.forEach((hex,i) => {
+    c.fillStyle = hex;
+    c.fillRect(x+8, y+8 + i*faixa, w-16, faixa-4);
+  });
+  c.font = "500 12px " + FA; c.fillStyle = D.tinta; c.textAlign = "center";
+  c.fillText(rotulo, x+w/2, y+h+17); c.textAlign = "left";
+}
+/* figura de silhueta desenhada */
+function silhueta(c, tipo, x, y, w, h, marcada){
+  const cx = x+w/2, om = {ampulheta:.42,"triangulo-invertido":.48,retangulo:.38,oval:.38,triangulo:.32}[tipo]||.4;
+  const ci = {ampulheta:.22,"triangulo-invertido":.30,retangulo:.34,oval:.40,triangulo:.30}[tipo]||.3;
+  const qu = {ampulheta:.42,"triangulo-invertido":.30,retangulo:.38,oval:.36,triangulo:.48}[tipo]||.4;
+  c.strokeStyle = marcada ? D.acento : D.fioForte;
+  c.lineWidth = marcada ? 2 : 1.3;
+  c.beginPath();
+  c.arc(cx, y+h*0.075, h*0.062, 0, Math.PI*2); c.stroke();
+  c.beginPath();
+  c.moveTo(cx - w*0.055, y+h*0.137); c.lineTo(cx - w*0.05, y+h*0.175);
+  c.moveTo(cx + w*0.055, y+h*0.137); c.lineTo(cx + w*0.05, y+h*0.175);
+  c.stroke();
+  c.beginPath();
+  c.moveTo(cx - w*0.05, y+h*0.175);
+  c.quadraticCurveTo(cx - w*om*0.92, y+h*0.185, cx - w*om, y+h*0.235);
+  c.quadraticCurveTo(cx - w*ci, y+h*0.44, cx - w*ci, y+h*0.52);
+  c.quadraticCurveTo(cx - w*qu, y+h*0.66, cx - w*qu*0.72, y+h*0.95);
+  c.lineTo(cx + w*qu*0.72, y+h*0.95);
+  c.quadraticCurveTo(cx + w*qu, y+h*0.66, cx + w*ci, y+h*0.52);
+  c.quadraticCurveTo(cx + w*ci, y+h*0.44, cx + w*om, y+h*0.235);
+  c.quadraticCurveTo(cx + w*om*0.92, y+h*0.185, cx + w*0.05, y+h*0.175);
+  c.stroke();
+  c.font = "400 11px " + FA; c.fillStyle = marcada ? D.acento : D.suave;
+  c.textAlign = "center";
+  c.fillText(({ampulheta:"Ampulheta","triangulo-invertido":"Triângulo inv.",retangulo:"Retângulo",oval:"Oval",triangulo:"Triângulo"})[tipo], cx, y+h+16);
+  if (marcada){ c.font = "400 15px " + FA; c.fillText("✓", cx, y+h+34); }
+  c.textAlign = "left";
+}
+
+
+function eixoBarra(c, esq, dir, valor, x, y, w){
+  rot(c, esq, x, y, D.suave, 10);
+  c.textAlign = "right"; rot(c, dir, x+w, y, D.suave, 10); c.textAlign = "left";
+  c.fillStyle = "#EDE6DA"; c.fillRect(x, y+12, w, 10);
+  c.strokeStyle = D.fioForte; c.lineWidth = 1; c.strokeRect(x+.5, y+12.5, w-1, 9);
+  const px = x + w*valor/100;
+  c.fillStyle = D.acento; c.fillRect(px-2, y+6, 4, 22);
+  c.font = "400 11px " + FM; c.fillStyle = D.suave;
+  c.fillText(String(valor), x, y+46);
+  return y + 62;
+}
+
+/* ---------- as quatro páginas ---------- */
+function ctx4(){
+  const e = ESTACOES[state.estacao], r = ROSTOS[state.rosto];
+  const t = TEMPERAMENTOS[state.temp], t2 = TEMPERAMENTOS[state.temp2];
+  return { e, r, t, t2, ax: state.eixosIA || e.eixos,
+    nome: $("fCliente").value.trim() || "Cliente",
+    data: $("fData").value ? $("fData").value.split("-").reverse().join("/") : "",
+    fio: $("selCabeloTipo").value, silh: $("selSilhueta").value };
+}
+function cabecalho(c, d, primeira){
+  const x = A4.m, R = A4.w - A4.m;
+  if (primeira){
+    c.font = "400 52px " + FS; c.fillStyle = D.tinta;
+    c.fillText("Dossiê Completo", x, 140);
+    rot(c, "Consultoria de imagem", x, 168, D.suave, 13);
+    c.font = "italic 400 22px " + FS; c.fillStyle = D.acento;
+    c.fillText("sua essência, sua imagem, sua assinatura.", x, 206);
+  } else {
+    c.font = "400 26px " + FS; c.fillStyle = D.tinta;
+    c.fillText("Dossiê Completo", x, 132);
+  }
+  c.textAlign = "right";
+  c.font = "600 15px " + FA; c.fillStyle = D.tinta;
+  c.letterSpacing = "3px"; c.fillText("HAIR ID", R, primeira ? 128 : 120); c.letterSpacing = "0px";
+  c.font = "400 24px " + FS; c.fillText(d.nome, R, primeira ? 168 : 150);
+  c.font = "400 12px " + FM; c.fillStyle = D.suave; c.fillText(d.data, R, primeira ? 190 : 170);
+  c.textAlign = "left";
+  c.strokeStyle = D.fioForte; c.lineWidth = 1;
+  const yl = primeira ? 232 : 192;
+  c.beginPath(); c.moveTo(x, yl); c.lineTo(R, yl); c.stroke();
+  return yl + 44;
+}
+function rodape(c, ultima){
+  if (!ultima) return;
+  const h = 108, y = A4.h - h;
+  c.fillStyle = D.faixa; c.fillRect(0, y, A4.w, h);
+  c.textAlign = "center";
+  c.font = "600 13px " + FA; c.fillStyle = "#E8DCCB";
+  c.letterSpacing = "3px";
+  c.fillText("SUA ESSÊNCIA É ÚNICA · SUA IMAGEM É SUA ASSINATURA", A4.w/2, y+44);
+  c.letterSpacing = "0px";
+  c.font = "italic 400 22px " + FS; c.fillStyle = "#F5EDE0";
+  c.fillText("Seja sua melhor versão, todos os dias.", A4.w/2, y+78);
+  c.textAlign = "left";
+}
+function numeroPagina(c, n){
+  c.textAlign = "center";
+  c.font = "400 11px " + FM; c.fillStyle = D.suave;
+  c.fillText(n + " / 4", A4.w/2, A4.h - 40);
+  c.textAlign = "left";
+}
+
+function pag1(d){
+  const { cv, c } = paginaNova(), x = A4.m, R = A4.w - A4.m;
+  let y = cabecalho(c, d, true);
+  const colL = 520, colR = R - (x + colL + 44);
+
+  /* 1 — identidade */
+  tituloSecao(c, "1", "Identidade visual", x, y, colL);
+  let yy = y + 46;
+  [["Essência", $("fEssencia").value], ["Estilo predominante", $("fEstilo").value],
+   ["Personalidade da imagem", $("fPersona").value], ["Mensagem a transmitir", $("fMensagem").value]
+  ].forEach(([k,v]) => { yy = par(c, k, v || "—", x, yy, colL); });
+
+  const cy = yy + 14;
+  cartao(c, x, cy, colL, 136);
+  c.font = "italic 400 25px " + FS; c.fillStyle = D.tinta; c.textAlign = "center";
+  c.fillText("Sua beleza já existe.", x+colL/2, cy+58);
+  c.fillText("Meu trabalho é revelar.", cx0(x,colL), cy+96);
+  c.textAlign = "left";
+
+  /* foto */
+  const fx = x + colL + 44, fh = 600;
+  const f0 = fotos[0], fonte = f0 && (f0.recorte || f0.img);
+  if (fonte){ cartao(c, fx, y, colR, fh); cobrir(c, fonte, fx+10, y+10, colR-20, fh-20); }
+  else vagaFoto(c, fx, y, colR, fh);
+  c.fillStyle = D.tinta; c.font = "400 14px " + FA;
+  const yl = txt(c, "Leitura geral: rosto " + d.r.nome.toLowerCase() + ". " + d.r.leitura +
+    " Linhas dominantes: " + d.t.linhas.toLowerCase(), fx, y + fh + 30, colR, 20, 4);
+
+  /* 2 — coloração, largura cheia */
+  let y2 = Math.max(cy + 136, yl) + 56;
+  tituloSecao(c, "2", "Coloração pessoal", x, y2, R-x);
+  y2 += 50;
+  c.font = "400 34px " + FS; c.fillStyle = D.tinta;
+  c.fillText(d.e.nome, x, y2);
+  c.textAlign = "right";
+  c.font = "400 13px " + FM; c.fillStyle = D.acento;
+  c.fillText(d.e.en.toUpperCase(), R, y2);
+  c.textAlign = "left";
+  y2 += 28;
+  c.font = "400 14px " + FA; c.fillStyle = D.suave;
+  c.fillText("Temperatura: " + (d.ax.subtom<25?"Fria":d.ax.subtom<45?"Neutro-fria":d.ax.subtom<60?"Neutra":d.ax.subtom<78?"Neutro-quente":"Quente") +
+    "   ·   Intensidade: " + (d.ax.int<35?"Suave":d.ax.int<70?"Média":"Alta") +
+    "   ·   Profundidade: " + (d.ax.prof<35?"Clara":d.ax.prof<65?"Média":"Escura") +
+    "   ·   Contraste: " + (d.ax.contr<35?"Baixo":d.ax.contr<70?"Médio":"Alto"), x, y2);
+  c.fillStyle = D.tinta; c.font = "400 15px " + FA;
+  y2 = txt(c, d.e.desc, x, y2+30, 900, 21, 3) + 26;
+
+  /* paleta larga à esquerda, evitar à direita */
+  const palW = 900, bx = x + palW + 60, bw = R - bx;
+  let yc = y2;
+  yc = faixaCores(c, "Neutros de base", d.e.neutros, x, yc, palW, 104);
+  yc = faixaCores(c, "Claras e médias", d.e.paleta.slice(0,5), x, yc, palW, 104);
+  yc = faixaCores(c, "Médias e profundas", d.e.paleta.slice(5,10), x, yc, palW, 104);
+
+  cartao(c, bx, y2 - 8, bw, Math.max(yc - y2 - 6, 54 + d.e.evitar.length*46 + 24));
+  rot(c, "Evitar perto do rosto", bx+22, y2+26, D.acento);
+  d.e.evitar.forEach(([hex,n], i) => {
+    const yy2 = y2 + 54 + i*46;
+    c.fillStyle = hex; c.fillRect(bx+22, yy2, 36, 30);
+    c.strokeStyle = "#00000040"; c.lineWidth = 1; c.strokeRect(bx+22.5, yy2+.5, 35, 29);
+    c.beginPath(); c.strokeStyle = "#00000066"; c.lineWidth = 1.6;
+    c.moveTo(bx+26, yy2+26); c.lineTo(bx+54, yy2+4); c.stroke();
+    c.font = "400 14px " + FA; c.fillStyle = D.tinta;
+    c.fillText(n, bx+72, yy2+21);
+  });
+
+  /* materiais */
+  let ym = yc + 30;
+  const mw = (R - x) / 4;
+  [["Metal", d.e.metal], ["Tecidos", d.e.tecidos], ["Estampa", d.e.estampa], ["Cor curinga", d.e.curinga]]
+    .forEach(([k,v], i) => {
+      rot(c, k, x + i*mw, ym, D.acento);
+      c.font = "400 14px " + FA; c.fillStyle = D.tinta;
+      txt(c, v, x + i*mw, ym+24, mw-34, 19, 4);
+    });
+
+  /* eixos medidos — o que nenhum dossiê pronto tem */
+  let ye = ym + 130;
+  tituloSecao(c, "", "Como esta leitura foi medida", x, ye, R-x);
+  ye += 52;
+  const ew = (R - x - 3*44) / 4;
+  ye = Math.max(
+    eixoBarra(c, "Frio", "Quente", d.ax.subtom, x, ye, ew),
+    eixoBarra(c, "Clara", "Escura", d.ax.prof, x + (ew+44), ye, ew),
+    eixoBarra(c, "Suave", "Brilhante", d.ax.int, x + 2*(ew+44), ye, ew),
+    eixoBarra(c, "Contraste −", "+", d.ax.contr, x + 3*(ew+44), ye, ew)
+  );
+  c.font = "400 13px " + FA; c.fillStyle = D.suave;
+  txt(c, state.eixosIA
+    ? "Valores medidos da foto em CIELAB: profundidade pelo L*, subtom pelo ângulo de matiz, contraste pela diferença de luminosidade entre pele, cabelo e olhos."
+    : "Valores de referência da estação. Meça a foto da cliente para ler a posição dela nos quatro eixos.", x, ye+12, R-x, 19, 2);
+
+  numeroPagina(c, 1);
+  return cv;
+}
+function cx0(x, w){ return x + w/2; }
+
+function pag2(d){
+  const { cv, c } = paginaNova(), x = A4.m, R = A4.w - A4.m;
+  let y = cabecalho(c, d, false);
+
+  /* 3 — visagismo */
+  tituloSecao(c, "3", "Visagismo — método Philip Hallawell", x, y, R-x);
+  y += 44;
+  const colA = 560;
+  let yy = y;
+  yy = par(c, "Formato do rosto", d.r.nome, x, yy, colA);
+  yy = par(c, "Linhas dominantes", d.t.linhas, x, yy, colA);
+  yy = par(c, "Objetivo", d.r.objetivo, x, yy, colA);
+  rot(c, "Estratégia", x, yy+6);
+  yy = bullets(c, [d.r.fazer, d.r.franja, d.t.cabelo, d.r.contorno], x, yy+28, colA) + 10;
+
+  const dx = x + colA + 60;
+  diagramaProporcoes(c, dx, y - 10, R - dx, 330, state.rosto, state.geo, D.acento, D.tinta, D.suave);
+  c.font = "400 12px " + FA; c.fillStyle = D.suave; c.textAlign = "center";
+  c.fillText(state.geo ? "proporções medidas da foto" : "proporções de referência do formato", dx + (R-dx)/2, y + 336);
+  c.textAlign = "left";
+
+  /* 4 — cabelo */
+  let y4 = Math.max(yy, y+260) + 46;
+  tituloSecao(c, "4", "Cabelo — projeto completo", x, y4, R-x);
+  y4 += 44;
+  c.font = "400 14px " + FA; c.fillStyle = D.tinta;
+  y4 = txt(c, "Objetivo: " + d.r.objetivo.toLowerCase() + " Fio " + d.fio + ". " + d.e.notaCabelo, x, y4, R-x, 20, 2) + 18;
+
+  const fw = (R - x - 3*18) / 4;
+  ["Cor atual","Cor sugerida","Corte de frente","Corte de perfil"].forEach((cap,i) =>
+    vagaFoto(c, x + i*(fw+18), y4, fw, 250, cap));
+  y4 += 250 + 40;
+  y4 = faixaCores(c, "Tons sugeridos", d.e.cabelo, x, y4, 560);
+
+  /* 5 — franjas ou penteados, conforme o fio */
+  const curvo = d.fio === "cacheado" || d.fio === "crespo";
+  tituloSecao(c, "5", curvo ? "Penteados que valorizam" : "Franjas e molduras", x, y4+14, R-x);
+  const y5 = y4 + 58;
+  const opc = curvo
+    ? ["Solto natural","Meio preso","Coque alto","Semi preso"]
+    : ["Cortina","Lateral longa","Reta e cheia","Sem franja"];
+  opc.forEach((cap,i) => vagaFoto(c, x + i*(fw+18), y5, fw, 250, cap));
+  c.font = "400 13px " + FA; c.fillStyle = D.suave;
+  txt(c, curvo
+    ? "O penteado deve respeitar a curvatura do fio e manter volume onde o formato do rosto pede."
+    : "A franja integra-se ao corte: " + d.r.franja.toLowerCase(), x, y5+282, R-x, 19, 2);
+
+  /* 6 — cuidados com o fio */
+  let y11 = y5 + 372;
+  tituloSecao(c, "6", "Cuidados com o fio", x, y11, R-x);
+  y11 += 44;
+    const rotina = curvo
+    ? [["Hidratação","1x por semana"],["Nutrição","a cada 15 dias"],["Finalização","produtos leves e definidores"],["Dormir","fronha de cetim ou touca"],["Proteção térmica","sempre antes do calor"],["Reparação","a cada 30 dias"]]
+    : [["Hidratação","1x por semana"],["Proteção térmica","antes de qualquer fonte de calor"],["Matização","conforme o reflexo escolhido"],["Corte de manutenção","a cada 8 a 10 semanas"],["Finalização","leve, sem pesar o fio"],["Reparação","a cada 30 dias"]];
+  const rw = (R - x) / 3;
+  rotina.forEach(([k,v],i) => {
+    const cxr = x + (i%3)*rw, cyr = y11 + Math.floor(i/3)*112;
+    c.fillStyle = D.acento; c.beginPath(); c.arc(cxr+9, cyr-4, 4, 0, Math.PI*2); c.fill();
+    rot(c, k, cxr+26, cyr);
+    c.font = "400 14px " + FA; c.fillStyle = D.tinta;
+    txt(c, v, cxr+26, cyr+22, rw-40, 19, 2);
+  });
+
+  numeroPagina(c, 2);
+  return cv;
+}
+
+function pag3(d){
+  const { cv, c } = paginaNova(), x = A4.m, R = A4.w - A4.m;
+  let y = cabecalho(c, d, false);
+
+  /* 6 — maquiagem */
+  tituloSecao(c, "7", "Maquiagem personalizada", x, y, R-x);
+  y += 44;
+  const colA = 520;
+  let yy = y;
+  yy = par(c, "Pele", "Acabamento conforme o temperamento: " + d.t.acabamento.toLowerCase() + " Cobertura leve a média.", x, yy, colA);
+  yy = par(c, "Olhos", d.t.maquiagem, x, yy, colA);
+  yy = par(c, "Correção", d.r.contorno, x, yy, colA);
+  yy = par(c, "Sobrancelha", d.r.sobrancelha, x, yy, colA);
+
+  const px = x + colA + 60;
+  let yp = y;
+  yp = faixaCores(c, "Sombras", d.e.sombra, px, yp, R-px);
+  yp = faixaCores(c, "Blush", d.e.blush, px, yp, R-px);
+  yp = faixaCores(c, "Batons", d.e.batom, px, yp, R-px);
+  yp = faixaCores(c, "Neutros de apoio", d.e.neutros, px, yp, R-px);
+
+  /* 7 — combinações */
+  let y7 = Math.max(yy, yp) + 40;
+  tituloSecao(c, "8", "Cores e combinações que valorizam", x, y7, R-x);
+  y7 += 50;
+  const cw = (R - x - 5*20) / 6, pal = d.e.paleta, neu = d.e.neutros;
+  const combos = [
+    [[neu[3][0], pal[0][0], neu[1][0]], neu[3][1] + " + " + pal[0][1]],
+    [[neu[0][0], pal[2][0], neu[2][0]], neu[0][1] + " + " + pal[2][1]],
+    [[pal[4][0], neu[3][0], neu[1][0]], pal[4][1] + " + " + neu[3][1]],
+    [[pal[1][0], neu[0][0], neu[2][0]], pal[1][1] + " + " + neu[0][1]],
+    [[pal[6][0], pal[8][0], neu[3][0]], pal[6][1] + " + " + pal[8][1]],
+    [[pal[3][0], neu[1][0], neu[0][0]], pal[3][1] + " + " + neu[1][1]]
+  ];
+  combos.forEach((cb,i) => comboCor(c, x + i*(cw+20), y7, cw, 200, cb[0], cb[1]));
+
+  /* 8 — estilo */
+  let y8 = y7 + 250;
+  tituloSecao(c, "9", "Estilo e looks", x, y8, R-x);
+  y8 += 44;
+  let ys = par(c, "Estilo", $("fEstilo").value || d.t.roupa, x, y8, 620);
+  ys = par(c, "Peças-chave", d.t.roupa, x, ys, 620);
+  ys = par(c, "Tecidos", d.e.tecidos, x, ys, 620);
+  ys = par(c, "Estampa", d.e.estampa, x, ys, 620);
+  ys = par(c, "Decote", d.r.decote, x, ys, 620);
+  const lw = (R - (x+680) - 2*16) / 3;
+  ["Dia a dia","Trabalho","Noite"].forEach((cap,i) =>
+    vagaFoto(c, x+680 + i*(lw+16), y8, lw, 270, cap));
+  numeroPagina(c, 3);
+  return cv;
+}
+
+function pag4(d){
+  const { cv, c } = paginaNova(), x = A4.m, R = A4.w - A4.m;
+  let y = cabecalho(c, d, false);
+
+  /* 9 — acessórios */
+  tituloSecao(c, "10", "Acessórios", x, y, R-x);
+  y += 44;
+  let yy = y;
+  yy = par(c, "Metais que harmonizam", d.e.metal, x, yy, 600);
+  yy = par(c, "Brincos", d.r.brinco, x, yy, 600);
+  yy = par(c, "Lenços e texturas", d.e.tecidos, x, yy, 600);
+
+  /* 10 — silhuetas */
+  const sx = x + 660;
+  tituloSecao(c, "11", "Guia de silhuetas", sx, y - 40, R - sx);
+  const sw = (R - sx) / 5;
+  ["ampulheta","triangulo-invertido","retangulo","oval","triangulo"].forEach((t,i) =>
+    silhueta(c, t, sx + i*sw, y+22, sw-14, 190, t === d.silh));
+  let ys = y + 22 + 190 + 60;
+  c.font = "400 13px " + FA; c.fillStyle = D.tinta;
+  rot(c, "Valorize", sx, ys);
+  ys = bullets(c, ["Cintura levemente marcada", "Decotes em V e U", "Comprimentos midi e longos", "Tecidos de caimento"], sx, ys+24, R-sx);
+
+  /* 12 — autoconfiança */
+  let y12 = Math.max(yy, ys) + 70;
+  tituloSecao(c, "12", "Cuidados e autoconfiança", x, y12, R-x);
+  y12 += 44;
+  const notas = [
+    ["Autenticidade", "Sua imagem deve refletir quem você já é — não quem você deveria ser."],
+    ["Cuidado", "Rotina de beleza é ato de atenção consigo, não obrigação."],
+    ["Presença", "Postura, escuta e energia transformam qualquer look."],
+    ["Consistência", "Pequenas escolhas diárias criam grandes resultados."]
+  ];
+  const nw = (R-x)/2;
+  notas.forEach(([k,v],i) => {
+    const nx = x + (i%2)*nw, ny = y12 + Math.floor(i/2)*88;
+    rot(c, k, nx, ny, D.acento);
+    c.font = "400 14px " + FA; c.fillStyle = D.tinta;
+    txt(c, v, nx, ny+24, nw-40, 19, 2);
+  });
+
+  const qy = y12 + 200;
+  cartao(c, x, qy, R-x, 120);
+  c.textAlign = "center"; c.font = "italic 400 24px " + FS; c.fillStyle = D.tinta;
+  c.fillText("Você já tem tudo para ser inesquecível.", A4.w/2, qy+52);
+  c.fillText("Isto é apenas o começo da sua melhor versão.", A4.w/2, qy+90);
+  c.textAlign = "left";
+
+  rodape(c, true);
+  numeroPagina(c, 4);
+  return cv;
+}
+
+async function gerarDossie(){
+  const btn = $("btnDossie");
+  btn.disabled = true;
+  $("dlStatus").textContent = "Montando o dossiê…";
+  $("dlStatus").className = "ai-status";
+  try{
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    const d = ctx4();
+    const pgs = [pag1(d), pag2(d), pag3(d), pag4(d)];
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation:"portrait", unit:"mm", format:"a4", compress:true });
+    pgs.forEach((cv, i) => {
+      if (i) pdf.addPage();
+      pdf.addImage(cv.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, 210, 297, undefined, "FAST");
+    });
+    pdf.save("dossie-hair-id-" + slug($("fCliente").value) + ".pdf");
+    $("dlStatus").textContent = "Dossiê salvo em PDF, 4 páginas A4.";
+  }catch(err){
+    $("dlStatus").textContent = "Não consegui gerar o PDF: " + (err && err.message ? err.message : "erro");
+    $("dlStatus").className = "ai-status err";
+  }finally{ btn.disabled = false; }
+}
+$("btnDossie").addEventListener("click", gerarDossie);
+
 /* ============================ painel (canvas) ============================ */
 const BW = 1080, BH = 1350, BS = 2, M = 54;
 const B_INK = "#1A1918", B_MUT = "#8A857E", B_RULE = "#E3E0DB";
@@ -1588,14 +2132,15 @@ const DIAGRAMA = {
   losango:    {p:[0.70,0.86,1.00,0.78,0.46], alt:1.40, corte:1.38, franja:"cortina", volume:"topo", cap:{c:"Passando do queixo", f:"Cortina ou lateral", v:"No topo e nas pontas"}},
 };
 const LARG_VOLUME = {
-  topo:  [1.34,1.24,1.14,1.10],
-  lados: [1.10,1.36,1.34,1.18],
-  base:  [1.06,1.14,1.28,1.42],
-  neutro:[1.16,1.24,1.24,1.20]
+  topo:  [1.30,1.20,1.10,1.06],
+  lados: [1.08,1.30,1.28,1.14],
+  base:  [1.04,1.12,1.24,1.32],
+  neutro:[1.14,1.20,1.20,1.16]
 };
 
-function curva(ctx, pts){
-  ctx.moveTo(pts[0][0], pts[0][1]);
+function curva(ctx, pts, continuar){
+  if (continuar) ctx.lineTo(pts[0][0], pts[0][1]);
+  else ctx.moveTo(pts[0][0], pts[0][1]);
   for (let i = 1; i < pts.length - 1; i++){
     const mx = (pts[i][0] + pts[i+1][0]) / 2, my = (pts[i][1] + pts[i+1][1]) / 2;
     ctx.quadraticCurveTo(pts[i][0], pts[i][1], mx, my);
@@ -1609,33 +2154,39 @@ function pathRosto(ctx, cx, topo, w, h, p){
   const hw = w/2;
   const dir = [
     [cx, topo],
-    [cx + hw*0.52, topo + h*0.04],
+    [cx + hw*0.30, topo + h*0.008],
+    [cx + hw*0.60, topo + h*0.055],
     [cx + hw*p[0], topo + h*0.16],
     [cx + hw*p[1], topo + h*0.33],
     [cx + hw*p[2], topo + h*0.53],
     [cx + hw*p[3], topo + h*0.77],
-    [cx + hw*p[4], topo + h*0.90],
+    [cx + hw*p[4], topo + h*0.88],
+    [cx + hw*p[4]*0.62, topo + h*0.965],
+    [cx + hw*p[4]*0.22, topo + h*0.998],
     [cx, topo + h]
   ];
   ctx.beginPath();
   curva(ctx, dir);
-  curva(ctx, espelha(dir, cx));
+  curva(ctx, espelha(dir, cx), true);
   ctx.closePath();
 }
 function pathCabelo(ctx, cx, topo, w, h, d){
   const hw = w/2, L = LARG_VOLUME[d.volume] || LARG_VOLUME.neutro, fim = topo + h*d.corte;
   const dir = [
-    [cx, topo - h*0.05],
-    [cx + hw*0.62, topo - h*0.01],
-    [cx + hw*L[0], topo + h*0.18],
+    [cx, topo - h*0.06],
+    [cx + hw*0.42, topo - h*0.045],
+    [cx + hw*0.82, topo + h*0.03],
+    [cx + hw*L[0], topo + h*0.19],
     [cx + hw*L[1], topo + h*0.46],
-    [cx + hw*L[2], topo + h*0.76],
-    [cx + hw*L[3], fim]
+    [cx + hw*L[2], topo + h*0.74],
+    [cx + hw*L[3]*0.96, fim - h*0.05]
   ];
   ctx.beginPath();
   curva(ctx, dir);
-  ctx.lineTo(cx - hw*L[3], fim);
-  curva(ctx, espelha(dir, cx).slice(1));
+  /* barra arredondada em vez de corte reto */
+  ctx.quadraticCurveTo(cx + hw*L[3]*0.86, fim + h*0.03, cx, fim + h*0.035);
+  ctx.quadraticCurveTo(cx - hw*L[3]*0.86, fim + h*0.03, cx - hw*L[3]*0.96, fim - h*0.05);
+  curva(ctx, espelha(dir, cx).slice(1), true);
   ctx.closePath();
 }
 function pathFranja(ctx, cx, topo, w, h, tipo){
@@ -1669,11 +2220,21 @@ function diagrama(ctx, modo, x, y, w, h, key, accent){
 
   if (modo !== "franja"){
     pathCabelo(ctx, cx, topo, fw, fh, d);
-    ctx.fillStyle = modo === "volume" ? accent + "26" : "#EFECE7";
+    ctx.fillStyle = "#EFECE7";
     ctx.fill();
-    ctx.strokeStyle = modo === "volume" ? accent : "#CFCAC3";
-    ctx.lineWidth = modo === "volume" ? 2 : 1.4;
+    ctx.strokeStyle = "#C6C1B9"; ctx.lineWidth = 1.4;
     ctx.stroke();
+    if (modo === "volume"){
+      const zona = { topo:[-0.10,0.26], lados:[0.24,0.62], base:[0.62,1.02], neutro:[0.20,0.70] }[d.volume] || [0.20,0.70];
+      ctx.save();
+      pathCabelo(ctx, cx, topo, fw, fh, d);
+      ctx.clip();
+      ctx.fillStyle = accent + "3A";
+      ctx.fillRect(cx - fw, topo + fh*zona[0], fw*2, fh*(zona[1]-zona[0]));
+      ctx.restore();
+      pathCabelo(ctx, cx, topo, fw, fh, d);
+      ctx.strokeStyle = accent; ctx.lineWidth = 1.8; ctx.stroke();
+    }
   }
   pathRosto(ctx, cx, topo, fw, fh, d.p);
   ctx.fillStyle = "#FFFFFF"; ctx.fill();
@@ -1690,6 +2251,58 @@ function diagrama(ctx, modo, x, y, w, h, key, accent){
     ctx.beginPath(); ctx.moveTo(x + w*0.08, fim); ctx.lineTo(x + w*0.92, fim); ctx.stroke();
     ctx.setLineDash([]);
   }
+}
+
+function diagramaProporcoes(ctx, x, y, w, h, key, geo, accent, tinta, suave){
+  const d = DIAGRAMA[key] || DIAGRAMA.oval;
+  const g = geo || { R:d.alt, tF:d.p[0], tJ:d.p[3] };
+  const fw = Math.min(w*0.46, h/(d.alt*1.06));
+  const fh = fw*d.alt;
+  const cx = x + w*0.40, topo = y + (h - fh)/2;
+  const hw = fw/2;
+
+  pathRosto(ctx, cx, topo, fw, fh, d.p);
+  ctx.fillStyle = "#FFFFFF"; ctx.fill();
+  ctx.strokeStyle = tinta || "#2E2620"; ctx.lineWidth = 1.6; ctx.stroke();
+
+  const marcas = [
+    ["Testa",     0.16, d.p[0], g.tF],
+    ["Maçãs",     0.53, d.p[2], 1.00],
+    ["Mandíbula", 0.77, d.p[3], g.tJ]
+  ];
+  ctx.font = "400 12px " + FA;
+  marcas.forEach(([nome, fy, larg, valor]) => {
+    const yy = topo + fh*fy, meia = hw*larg;
+    ctx.strokeStyle = accent; ctx.lineWidth = 1;
+    ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(cx-meia, yy); ctx.lineTo(cx+meia, yy); ctx.stroke();
+    ctx.setLineDash([]);
+    [-1,1].forEach(sg => {
+      ctx.beginPath(); ctx.moveTo(cx+sg*meia, yy-5); ctx.lineTo(cx+sg*meia, yy+5); ctx.stroke();
+    });
+    ctx.beginPath(); ctx.moveTo(cx+meia, yy); ctx.lineTo(x+w*0.70, yy); ctx.stroke();
+    ctx.fillStyle = suave || "#6E6152";
+    ctx.fillText(nome, x+w*0.72, yy-4);
+    ctx.font = "400 12px " + FM; ctx.fillStyle = accent;
+    ctx.fillText(valor.toFixed(2), x+w*0.72, yy+14);
+    ctx.font = "400 12px " + FA;
+  });
+
+  /* caliper vertical da altura */
+  const vx = x + w*0.055;
+  ctx.strokeStyle = accent; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(vx, topo); ctx.lineTo(vx, topo+fh); ctx.stroke();
+  [-1,1].forEach(sg => {
+    const yy = sg < 0 ? topo : topo+fh;
+    ctx.beginPath(); ctx.moveTo(vx-5, yy); ctx.lineTo(vx+5, yy); ctx.stroke();
+  });
+  ctx.save();
+  ctx.translate(vx-8, topo+fh/2); ctx.rotate(-Math.PI/2);
+  ctx.textAlign = "center";
+  ctx.font = "400 12px " + FM; ctx.fillStyle = accent;
+  ctx.fillText("altura / largura  " + g.R.toFixed(2), 0, 0);
+  ctx.restore();
+  ctx.textAlign = "left";
 }
 
 function linhas(ctx, texto, maxW){
@@ -1834,16 +2447,14 @@ function desenharPainel(){
   rotulo(ctx, "04  LINHA DO CORTE  ·  " + r.nome.toUpperCase(), M, 1006);
   const dw = (R - M) / 3;
   const dg = DIAGRAMA[state.rosto] || DIAGRAMA.oval;
-  [["corte","COMPRIMENTO", dg.cap.c],
-   ["franja","FRANJA", dg.cap.f],
-   ["volume","VOLUME", dg.cap.v]
-  ].forEach(([modo, cap, txt], i) => {
-    const x = M + i*dw;
-    diagrama(ctx, modo, x, 1018, dw - 14, 132, state.rosto, A);
+  diagramaProporcoes(ctx, M, 1012, dw*1.35, 150, state.rosto, state.geo, A, B_INK, B_MUT);
+  [["COMPRIMENTO", dg.cap.c], ["FRANJA", dg.cap.f], ["VOLUME", dg.cap.v]
+  ].forEach(([cap, t], i) => {
+    const x = M + dw*1.45, yy = 1036 + i*42;
     ctx.font = "600 11px " + F_ARCH; ctx.fillStyle = A;
-    ctx.letterSpacing = "1.4px"; ctx.fillText(cap, x, 1172); ctx.letterSpacing = "0px";
-    ctx.font = "400 12px " + F_ARCH; ctx.fillStyle = "#4A4640";
-    texto(ctx, txt, x, 1191, dw - 20, 16, 3);
+    ctx.letterSpacing = "1.4px"; ctx.fillText(cap, x, yy); ctx.letterSpacing = "0px";
+    ctx.font = "400 13px " + F_ARCH; ctx.fillStyle = "#4A4640";
+    texto(ctx, t, x + 116, yy, R - x - 120, 16, 1);
   });
   regua(ctx, M, 1246, R);
 
@@ -1904,6 +2515,7 @@ if (document.fonts && document.fonts.load){
 abrirLupa();
 
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.1/jspdf.umd.min.js"></script>
 <script type="module">
 import { FilesetResolver, FaceLandmarker, ImageSegmenter } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/vision_bundle.mjs";
 let base = null, pronto = null, recortador = null;

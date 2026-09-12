@@ -23,7 +23,15 @@ para servidor nenhum.
    foto, no papel que o cartão cinza cumpre na consultoria presencial.
 5. **Estação** — os quatro eixos (subtom, profundidade, intensidade, contraste)
    são comparados com as 12 estações e vence a de menor distância ponderada.
-6. **Painel** — um PNG 1080 × 1350 desenhado em canvas, pronto para mandar à cliente.
+6. **Entrega** — dois formatos, ambos desenhados em canvas no navegador:
+   - **Dossiê PDF A4, 4 páginas, 12 seções** — identidade, coloração, visagismo,
+     cabelo, franjas, cuidados com o fio, maquiagem, combinações de cor, estilo,
+     acessórios, silhuetas e autoconfiança.
+   - **Painel PNG 1080 × 1350** para mandar no WhatsApp.
+
+   As combinações de cor, as silhuetas e o diagrama de proporções do rosto são
+   desenhados com as cores e medidas da própria cliente — não são foto de banco
+   de imagem. As vagas de foto de cabelo ficam reservadas no documento.
 
 A classificação é determinística: a mesma foto e os mesmos pontos dão sempre o
 mesmo resultado. As recomendações não são geradas na hora — saem de três tabelas
