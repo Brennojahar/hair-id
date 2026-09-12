@@ -1,0 +1,1800 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Hair ID — diagnóstico de coloração pessoal e visagismo a partir da foto da cliente.">
+<meta name="color-scheme" content="light dark">
+<title>Cartela &amp; Visagismo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;1,400&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,700;1,6..96,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  --ground:#E4E1DC;
+  --paper:#F2F0EC;
+  --paper-2:#EAE7E2;
+  --ink:#1E1D1C;
+  --ink-2:#57534E;
+  --ink-3:#8A847D;
+  --rule:#D2CEC7;
+  --rule-strong:#B6B0A7;
+  --chip-edge:#00000022;
+  --season-accent:#4A4E57;
+  --accent:var(--season-accent);
+  --accent-soft:color-mix(in oklab, var(--season-accent) 14%, var(--paper));
+  --warn:#8A5A16;
+  --serif:"Bodoni Moda", "Didot", "Times New Roman", serif;
+  --sans:"Archivo", "Helvetica Neue", Arial, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --maxw:1180px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#16161A;
+    --paper:#1E1E23;
+    --paper-2:#26262C;
+    --ink:#EDEBE7;
+    --ink-2:#AFABA5;
+    --ink-3:#7E7973;
+    --rule:#32323A;
+    --rule-strong:#4A4A54;
+    --chip-edge:#FFFFFF26;
+    --accent:color-mix(in oklab, var(--season-accent) 52%, #FFFFFF);
+    --accent-soft:color-mix(in oklab, var(--season-accent) 26%, var(--paper));
+    --warn:#D6A24E;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#16161A;
+  --paper:#1E1E23;
+  --paper-2:#26262C;
+  --ink:#EDEBE7;
+  --ink-2:#AFABA5;
+  --ink-3:#7E7973;
+  --rule:#32323A;
+  --rule-strong:#4A4A54;
+  --chip-edge:#FFFFFF26;
+  --accent:color-mix(in oklab, var(--season-accent) 52%, #FFFFFF);
+  --accent-soft:color-mix(in oklab, var(--season-accent) 26%, var(--paper));
+  --warn:#D6A24E;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:15px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.shell{max-width:var(--maxw);margin:0 auto;padding:28px 22px 60px}
+
+/* ---------- masthead ---------- */
+.masthead{
+  display:grid;grid-template-columns:1.1fr .9fr;gap:32px;align-items:end;
+  padding-bottom:20px;border-bottom:1px solid var(--rule-strong);
+}
+.eyebrow{
+  display:block;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--ink-3);margin-bottom:8px;
+}
+h1{
+  font-family:var(--serif);font-weight:400;font-size:clamp(2.3rem,4.6vw,3.3rem);
+  line-height:1.02;margin:0;letter-spacing:-.01em;text-wrap:balance;
+}
+h1 .amp{font-style:italic;color:var(--accent);transition:color .35s ease}
+.sub{margin:10px 0 0;color:var(--ink-2);font-size:.9rem;max-width:44ch}
+
+.ficha{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+.ficha .full{grid-column:1 / -1}
+.field{display:flex;flex-direction:column;gap:5px}
+label,.lab{
+  font-size:.63rem;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-3);
+}
+input[type="text"],input[type="date"],select,textarea{
+  font-family:var(--sans);font-size:.9rem;color:var(--ink);
+  background:var(--paper);border:1px solid var(--rule);border-radius:2px;
+  padding:8px 10px;width:100%;
+}
+input[type="text"]:hover,select:hover{border-color:var(--rule-strong)}
+select{cursor:pointer;appearance:none;background-image:none;padding-right:26px}
+.sel-wrap{position:relative}
+.sel-wrap::after{
+  content:"";position:absolute;right:10px;top:50%;width:6px;height:6px;
+  border-right:1.5px solid var(--ink-3);border-bottom:1.5px solid var(--ink-3);
+  transform:translateY(-70%) rotate(45deg);pointer-events:none;
+}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.badge{
+  display:inline-flex;align-items:center;gap:6px;font-size:.63rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--warn);border:1px solid var(--warn);
+  padding:3px 8px;border-radius:2px;
+}
+.ficha-top{display:flex;justify-content:space-between;align-items:center;grid-column:1 / -1;min-height:24px}
+button{
+  font-family:var(--sans);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;
+  background:transparent;color:var(--ink);border:1px solid var(--rule-strong);
+  border-radius:2px;padding:7px 13px;cursor:pointer;transition:background .15s,border-color .15s;
+}
+button:hover{background:var(--paper);border-color:var(--ink-3)}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+button.primary:hover{filter:brightness(1.08)}
+button:disabled{opacity:.45;cursor:not-allowed}
+
+/* ---------- sections ---------- */
+section{margin-top:44px}
+.sec-head{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--rule);padding-bottom:9px;margin-bottom:20px}
+.numeral{
+  font-family:var(--serif);font-size:1.5rem;line-height:1;color:var(--accent);
+  font-variant-numeric:tabular-nums;transition:color .35s ease;
+}
+.sec-head h2{font-family:var(--serif);font-weight:400;font-size:1.42rem;margin:0;letter-spacing:-.01em}
+.sec-head .note{margin-left:auto;font-size:.72rem;color:var(--ink-3);text-align:right}
+
+/* ---------- diagnóstico ---------- */
+.diag{display:grid;grid-template-columns:260px 1fr;gap:26px;align-items:start}
+.photo-pane{display:flex;flex-direction:column;gap:10px}
+.drop{
+  min-height:104px;border:1px dashed var(--rule-strong);border-radius:2px;
+  background:var(--paper);display:flex;align-items:center;justify-content:center;
+  text-align:center;padding:18px;color:var(--ink-3);font-size:.78rem;cursor:pointer;
+  position:relative;overflow:hidden;line-height:1.45;
+}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.thumbs:empty{display:none}
+.thumb{position:relative;aspect-ratio:3/4;border:1px solid var(--rule);border-radius:2px;overflow:hidden;background:var(--paper-2)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb button{
+  position:absolute;top:3px;right:3px;width:20px;height:20px;padding:0;line-height:1;
+  border-radius:50%;background:#00000099;color:#FFFFFF;border:0;font-size:.8rem;
+}
+.thumb button:hover{background:#000000CC}
+#medir{display:flex;flex-direction:column;gap:9px}
+#lupa{width:100%;height:auto;display:block;border:1px solid var(--rule);border-radius:2px;cursor:crosshair}
+.amostras{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.am{display:flex;align-items:center;gap:7px;justify-content:flex-start;padding:6px 8px;font-size:.63rem}
+.am span{width:15px;height:15px;flex:0 0 auto;border:1px solid var(--rule-strong);border-radius:2px;background:var(--c,transparent)}
+.am[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.privacy{font-size:.7rem;color:var(--ink-3);line-height:1.45}
+.ai-status{font-size:.75rem;min-height:1.2em;color:var(--ink-2)}
+.ai-status.err{color:var(--warn)}
+
+.picks{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 18px}
+.picks .field{gap:6px}
+.desc{font-size:.82rem;color:var(--ink-2);grid-column:1 / -1;margin:0;border-left:2px solid var(--accent);padding-left:12px;transition:border-color .35s ease}
+
+.axes{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:22px;padding-top:18px;border-top:1px solid var(--rule)}
+.axis .lab{display:flex;justify-content:space-between;margin-bottom:7px}
+.track{height:8px;border-radius:1px;position:relative;border:1px solid var(--chip-edge)}
+.track .mark{
+  position:absolute;top:-4px;width:2px;height:16px;background:var(--ink);
+  transform:translateX(-1px);transition:left .4s cubic-bezier(.22,.7,.3,1);
+}
+.axis .val{font-family:var(--mono);font-size:.68rem;color:var(--ink-2);margin-top:7px;display:block}
+
+/* ---------- swatches ---------- */
+.sw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(94px,1fr));gap:10px}
+.sw{display:flex;flex-direction:column;gap:5px}
+.chip{
+  display:block;height:56px;border-radius:1px;background:var(--c);
+  border:1px solid var(--chip-edge);position:relative;
+}
+.sw.no .chip::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(to top right,transparent calc(50% - .6px),#FFFFFFCC calc(50% - .6px),#FFFFFFCC calc(50% + .6px),transparent calc(50% + .6px)),
+             linear-gradient(to bottom right,transparent calc(50% - .6px),#00000055 calc(50% - .6px),#00000055 calc(50% + .6px),transparent calc(50% + .6px));
+}
+.sw-n{font-size:.73rem;line-height:1.25;color:var(--ink-2)}
+.sw-h{font-family:var(--mono);font-size:.63rem;color:var(--ink-3);text-transform:uppercase}
+
+.cols-2{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+.cols-3{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+.block{display:flex;flex-direction:column;gap:11px}
+h3{
+  font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);
+  margin:0;font-weight:600;
+}
+.pair{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-bottom:1px solid var(--rule);font-size:.85rem}
+.pair:last-child{border-bottom:0}
+.pair dt{color:var(--ink-3);flex:0 0 auto;font-size:.63rem;letter-spacing:.14em;text-transform:uppercase;padding-top:3px}
+.pair dd{margin:0;text-align:right;color:var(--ink)}
+dl{margin:0}
+
+.rec{display:flex;flex-direction:column;gap:3px;padding:11px 0;border-bottom:1px solid var(--rule)}
+.rec:last-child{border-bottom:0}
+.rec .src{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);transition:color .35s ease}
+.rec .txt{font-size:.87rem;color:var(--ink);line-height:1.55}
+.rec.avoid .src{color:var(--ink-3)}
+.rec.avoid .txt{color:var(--ink-2)}
+
+/* ---------- painel final ---------- */
+.panel{background:var(--paper);border:1px solid var(--rule);border-radius:2px;padding:24px}
+.panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:20px;flex-wrap:wrap;margin-bottom:18px}
+.panel-head .who{font-family:var(--serif);font-size:1.7rem;line-height:1.1;margin:0}
+.verdict{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:20px}
+.verdict div{display:flex;flex-direction:column;gap:3px}
+.verdict b{font-family:var(--serif);font-weight:400;font-size:1.12rem}
+.ribbon{display:flex;height:34px;border:1px solid var(--chip-edge);border-radius:1px;overflow:hidden;margin-bottom:20px}
+.ribbon span{flex:1}
+
+.board-wrap{display:grid;grid-template-columns:440px 1fr;gap:28px;align-items:start;margin-bottom:30px}
+#board{width:100%;height:auto;display:block;border:1px solid var(--rule);border-radius:2px;background:#FFFFFF}
+.board-side p{margin:0 0 16px;font-size:.85rem;color:var(--ink-2);max-width:44ch}
+.board-side .toolbar{margin-top:0}
+details{border-top:1px solid var(--rule);padding-top:14px;margin-top:26px}
+summary{
+  cursor:pointer;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:600;
+}
+summary::marker{color:var(--rule-strong)}
+@media (max-width:880px){ .board-wrap{grid-template-columns:1fr} }
+
+.prompt-box{margin-top:14px}
+.prompt-box textarea{
+  font-family:var(--mono);font-size:.72rem;line-height:1.6;min-height:150px;resize:vertical;
+  background:var(--paper-2);
+}
+.prompt-box .head{display:flex;align-items:center;gap:12px;margin-bottom:7px}
+.prompt-box .head h3{margin-right:auto}
+.neg textarea{min-height:74px}
+
+footer{
+  margin-top:52px;padding-top:18px;border-top:1px solid var(--rule);
+  font-size:.75rem;color:var(--ink-3);line-height:1.6;max-width:70ch;
+}
+footer strong{color:var(--ink-2);font-weight:500}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+
+@media (max-width:880px){
+  .masthead{grid-template-columns:1fr;gap:22px}
+  .diag{grid-template-columns:1fr}
+  .drop{max-width:230px;aspect-ratio:4/5}
+  .cols-2,.cols-3{grid-template-columns:1fr}
+  .axes{grid-template-columns:1fr 1fr}
+  .picks{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important;animation:none !important}
+}
+@media print{
+  :root{--ground:#FFFFFF;--paper:#FFFFFF;--paper-2:#FFFFFF;--ink:#000000;--ink-2:#333333;--ink-3:#666666;--rule:#CCCCCC;--rule-strong:#999999}
+  .no-print{display:none !important}
+  body{font-size:11px}
+  .shell{padding:0;max-width:none}
+  section{margin-top:22px;break-inside:avoid}
+  .chip{height:40px}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="masthead">
+    <div class="brand">
+      <span class="eyebrow">Hair ID &middot; ficha de diagnóstico</span>
+      <h1>Cartela <span class="amp">&amp;</span> Visagismo</h1>
+      <p class="sub">Envie a foto da cliente. A página mede o rosto e as cores no seu próprio navegador, preenche o diagnóstico e monta o painel de entrega.</p>
+    </div>
+    <div class="ficha">
+      <div class="ficha-top no-print">
+        <span class="badge" id="exampleBadge">Ficha de exemplo</span>
+        <button type="button" id="btnNova">Nova ficha</button>
+      </div>
+      <div class="field"><label for="fCliente">Cliente</label><input type="text" id="fCliente" placeholder="Nome da cliente"></div>
+      <div class="field"><label for="fData">Data</label><input type="date" id="fData"></div>
+    </div>
+  </header>
+
+  <main>
+    <!-- 01 -->
+    <section id="s1">
+      <div class="sec-head">
+        <span class="numeral">01</span>
+        <h2>Diagnóstico</h2>
+        <span class="note">A medição sugere; o drapeado na luz natural confirma.</span>
+      </div>
+
+      <div class="diag">
+        <div class="photo-pane no-print">
+          <div class="drop" id="drop" tabindex="0" role="button" aria-label="Enviar fotos da cliente">
+            <span id="dropHint">Clique ou arraste as fotos<br><span style="opacity:.7">rosto de frente e de perfil, luz natural, sem filtro, sem maquiagem pesada e com o cabelo solto</span></span>
+          </div>
+          <div class="thumbs" id="thumbs"></div>
+          <input type="file" id="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
+
+          <button type="button" class="primary" id="btnAuto" disabled>Ler rosto e cores</button>
+          <div class="ai-status" id="autoStatus">Envie uma foto de frente para começar.</div>
+
+          <div id="medir" hidden>
+            <canvas id="lupa" aria-label="Foto com os pontos medidos"></canvas>
+            <p class="privacy">Os círculos mostram de onde cada cor foi tirada. Se algum caiu no lugar errado — sombra, mecha tingida, fundo — clique na amostra e depois no ponto certo da foto.</p>
+            <div class="amostras">
+              <button type="button" class="am" data-am="pele"><span></span>Pele</button>
+              <button type="button" class="am" data-am="cabelo"><span></span>Cabelo</button>
+              <button type="button" class="am" data-am="olhos"><span></span>Olhos</button>
+              <button type="button" class="am" data-am="neutro"><span></span>Neutro</button>
+            </div>
+            <button type="button" id="btnMedir" disabled>Recalcular a estação</button>
+            <div class="ai-status" id="medStatus"></div>
+          </div>
+
+          <p class="privacy"><strong>As fotos não saem deste computador.</strong> A leitura roda inteira dentro do navegador — nada é enviado para servidor nenhum, e nada fica salvo.</p>
+        </div>
+
+        <div>
+          <div class="picks">
+            <div class="field">
+              <label for="selEstacao">Estação de cor</label>
+              <div class="sel-wrap"><select id="selEstacao"></select></div>
+            </div>
+            <div class="field">
+              <label for="selRosto">Formato do rosto</label>
+              <div class="sel-wrap"><select id="selRosto"></select></div>
+            </div>
+            <div class="field">
+              <label for="selTemp">Temperamento dominante</label>
+              <div class="sel-wrap"><select id="selTemp"></select></div>
+            </div>
+            <div class="field">
+              <label for="selTemp2">Temperamento secundário</label>
+              <div class="sel-wrap"><select id="selTemp2"></select></div>
+            </div>
+            <p class="desc" id="descEstacao"></p>
+          </div>
+
+          <div class="axes">
+            <div class="axis">
+              <span class="lab"><span>Frio</span><span>Quente</span></span>
+              <div class="track" id="trkSubtom"><span class="mark"></span></div>
+              <span class="val" id="valSubtom"></span>
+            </div>
+            <div class="axis">
+              <span class="lab"><span>Clara</span><span>Escura</span></span>
+              <div class="track" id="trkProf"><span class="mark"></span></div>
+              <span class="val" id="valProf"></span>
+            </div>
+            <div class="axis">
+              <span class="lab"><span>Suave</span><span>Brilhante</span></span>
+              <div class="track" id="trkInt"><span class="mark"></span></div>
+              <span class="val" id="valInt"></span>
+            </div>
+            <div class="axis">
+              <span class="lab"><span>Contraste −</span><span>+</span></span>
+              <div class="track" id="trkCon"><span class="mark"></span></div>
+              <span class="val" id="valCon"></span>
+            </div>
+          </div>
+          <p class="privacy" id="axesOrigem" style="margin-top:12px"></p>
+
+          <div id="leituraIA" hidden style="margin-top:18px;padding-top:16px;border-top:1px solid var(--rule)">
+            <h3 style="margin-bottom:10px">O que foi medido</h3>
+            <dl id="leituraIAlist"></dl>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 -->
+    <section id="s2">
+      <div class="sec-head">
+        <span class="numeral">02</span>
+        <h2>Cartela cromática</h2>
+        <span class="note" id="noteEstacao"></span>
+      </div>
+      <div class="cols-2">
+        <div class="block">
+          <h3>Paleta principal</h3>
+          <div class="sw-grid" id="gPaleta"></div>
+        </div>
+        <div class="block">
+          <h3>Neutros de base</h3>
+          <div class="sw-grid" id="gNeutros"></div>
+          <h3 style="margin-top:8px">Cores a evitar</h3>
+          <div class="sw-grid" id="gEvitar"></div>
+        </div>
+      </div>
+      <div class="cols-2" style="margin-top:26px">
+        <div class="block">
+          <h3>Materiais</h3>
+          <dl>
+            <div class="pair"><dt>Metal</dt><dd id="vMetal"></dd></div>
+            <div class="pair"><dt>Tecidos</dt><dd id="vTecidos"></dd></div>
+            <div class="pair"><dt>Estampa</dt><dd id="vEstampa"></dd></div>
+          </dl>
+        </div>
+        <div class="block">
+          <h3>Regra de uso</h3>
+          <dl>
+            <div class="pair"><dt>Junto ao rosto</dt><dd id="vRosto"></dd></div>
+            <div class="pair"><dt>Contraste</dt><dd id="vContraste"></dd></div>
+            <div class="pair"><dt>Cor curinga</dt><dd id="vCuringa"></dd></div>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 -->
+    <section id="s3">
+      <div class="sec-head">
+        <span class="numeral">03</span>
+        <h2>Cabelo</h2>
+        <span class="note">Cor pela estação &middot; corte pelo formato &middot; textura pelo temperamento</span>
+      </div>
+      <div class="cols-2">
+        <div class="block">
+          <h3>Cor e reflexo</h3>
+          <div class="sw-grid" id="gCabelo"></div>
+          <p class="desc" id="notaCabelo" style="border-left-color:var(--rule-strong)"></p>
+        </div>
+        <div class="block">
+          <h3>Corte, franja e acabamento</h3>
+          <div id="recCabelo"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 -->
+    <section id="s4">
+      <div class="sec-head">
+        <span class="numeral">04</span>
+        <h2>Maquiagem</h2>
+        <span class="note">Paleta pela estação &middot; correção pelo formato &middot; intensidade pelo temperamento</span>
+      </div>
+      <div class="cols-3">
+        <div class="block"><h3>Boca</h3><div class="sw-grid" id="gBatom"></div></div>
+        <div class="block"><h3>Blush</h3><div class="sw-grid" id="gBlush"></div></div>
+        <div class="block"><h3>Olhos</h3><div class="sw-grid" id="gSombra"></div></div>
+      </div>
+      <div style="margin-top:24px"><div id="recMaquiagem"></div></div>
+    </section>
+
+    <!-- 05 -->
+    <section id="s5">
+      <div class="sec-head">
+        <span class="numeral">05</span>
+        <h2>Guarda-roupa e styling</h2>
+        <span class="note">Decote e acessório pelo formato &middot; silhueta pelo temperamento</span>
+      </div>
+      <div id="recRoupa"></div>
+    </section>
+
+    <!-- 06 -->
+    <section id="s6">
+      <div class="sec-head">
+        <span class="numeral">06</span>
+        <h2>Painel da cliente</h2>
+        <span class="note no-print">Uma imagem 1080 &times; 1350, pronta para mandar.</span>
+      </div>
+
+      <div class="board-wrap no-print">
+        <canvas id="board" width="2160" height="2700" role="img" aria-label="Painel de entrega da cliente"></canvas>
+        <div class="board-side">
+          <p>O painel se refaz a cada mudança no diagnóstico. A foto entra no quadro 01 — sem foto, o quadro fica só com o nome e a estação.</p>
+          <div class="toolbar">
+            <button type="button" class="primary" id="btnBaixar">Baixar PNG</button>
+            <button type="button" id="btnCopiarTudo">Copiar dossiê em texto</button>
+            <button type="button" onclick="window.print()">Imprimir ficha completa</button>
+          </div>
+          <div class="ai-status" id="dlStatus"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h4 class="who" id="pWho">Cliente</h4>
+          <span class="sw-h" id="pMeta"></span>
+        </div>
+        <div class="ribbon" id="pRibbon"></div>
+        <div class="verdict">
+          <div><span class="lab">Estação</span><b id="pEstacao"></b></div>
+          <div><span class="lab">Formato</span><b id="pRosto"></b></div>
+          <div><span class="lab">Temperamento</span><b id="pTemp"></b></div>
+          <div><span class="lab">Metal</span><b id="pMetal"></b></div>
+        </div>
+        <div id="pResumo"></div>
+      </div>
+
+      <details class="no-print">
+        <summary>Prompts para gerar imagens de apoio em outra ferramenta</summary>
+        <div class="prompt-box">
+          <div class="head"><h3>Prompt — painel de estilo</h3><button type="button" data-copy="txtPainel">Copiar</button></div>
+          <textarea id="txtPainel" readonly></textarea>
+        </div>
+        <div class="prompt-box neg no-print">
+          <div class="head"><h3>Negative prompt</h3><button type="button" data-copy="txtPainelNeg">Copiar</button></div>
+          <textarea id="txtPainelNeg" readonly></textarea>
+        </div>
+        <div class="prompt-box no-print">
+          <div class="head"><h3>Prompt — retrato de referência</h3><button type="button" data-copy="txtRetrato">Copiar</button></div>
+          <textarea id="txtRetrato" readonly></textarea>
+        </div>
+        <div class="prompt-box neg no-print">
+          <div class="head"><h3>Negative prompt</h3><button type="button" data-copy="txtRetratoNeg">Copiar</button></div>
+          <textarea id="txtRetratoNeg" readonly></textarea>
+        </div>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    <p><strong>Método.</strong> O visagismo aqui segue Philip Hallawell — leitura de linhas, formas e temperamento como base das escolhas de corte, cor e styling. A coloração pessoal usa o sistema sazonal expandido de 12 estações, com os eixos de subtom, profundidade, intensidade e contraste. <strong>Não existe</strong> um método “Claude Juilliard visagisme 3D”: se você viu essa referência em algum material, ela não corresponde a autor ou instituição verificável.</p>
+    <p><strong>Como a leitura é feita.</strong> A detecção de pontos faciais roda dentro do seu navegador (WebAssembly) e devolve as coordenadas do rosto. Daí saem as proporções — altura sobre largura, testa e mandíbula sobre maçãs, ângulo do maxilar — que definem o formato e as linhas dominantes. As cores são lidas em CIELAB a partir de amostras de pele, cabelo e íris, com a esclera do olho servindo de referência neutra para corrigir o balanço de branco da foto. Nenhuma imagem sai do computador.</p>
+    <p><strong>Limites.</strong> A medição por foto é um ponto de partida — luz amarela, filtro, maquiagem pesada e cabelo tingido deslocam a leitura. O diagnóstico final se fecha com drapeados de tecido no rosto lavado, sob luz natural indireta. As paletas são referência de direção, não código hexadecimal de tinta ou cosmético.</p>
+  </footer>
+</div>
+
+<script>
+/* ============================ dados ============================ */
+const ESTACOES = {
+  "primavera-clara": {
+    nome:"Primavera Clara", en:"Light Spring", accent:"#D2664A",
+    eixos:{subtom:68,prof:22,int:58,contr:28},
+    desc:"Quente com toque neutro, claríssima e de contraste baixo. Tudo nela é luz: a cor precisa ser limpa e leve, nunca pesada. Escuro demais apaga o rosto antes de qualquer outra coisa.",
+    paleta:[["#FFB89A","Pêssego"],["#FF8F73","Coral claro"],["#FCE38A","Amarelo manteiga"],["#A8D66F","Verde maçã"],["#7FD8CE","Aqua claro"],["#8FC7E8","Azul céu"],["#C9A8D8","Lilás quente"],["#FF9E8C","Salmão"],["#D9B486","Camelo claro"],["#F5EDE0","Marfim"]],
+    neutros:[["#E4D2BB","Bege quente"],["#C79A6B","Camelo"],["#CBC0B4","Cinza quente"],["#F5EDE0","Marfim"]],
+    evitar:[["#0F0F12","Preto"],["#4A0E22","Borgonha escuro"],["#3C4148","Cinza frio escuro"],["#101B3C","Marinho"]],
+    metal:"Ouro claro e ouro rosé",
+    tecidos:"Leves e com leve luminosidade: crepe fino, seda lavada, algodão penteado, linho claro",
+    estampa:"Pequena e clara — floral miúdo, poá, listra fina",
+    curinga:"Marfim #F5EDE0 no lugar do branco puro",
+    cabelo:[["#C9A15E","Loiro mel"],["#DDBE86","Loiro dourado claro"],["#8E6437","Castanho claro dourado"],["#B4703C","Ruivo mel"]],
+    notaCabelo:"Iluminados finos e raiz nunca mais de dois tons abaixo do comprimento. Reflexo acinzentado envelhece e apaga a pele.",
+    batom:[["#F4785F","Coral"],["#F09E82","Pêssego"],["#EE8698","Rosa quente"],["#D5A183","Nude dourado"]],
+    blush:[["#F5A98C","Pêssego"],["#F58C7C","Coral claro"],["#EFB48F","Damasco"]],
+    sombra:[["#E9CFAE","Champanhe"],["#EDB392","Pêssego"],["#A9AE72","Musgo claro"],["#C98A5B","Cobre claro"]]
+  },
+  "primavera-quente": {
+    nome:"Primavera Quente", en:"True Spring", accent:"#C9531F",
+    eixos:{subtom:88,prof:48,int:72,contr:48},
+    desc:"O calor é a característica dominante, sem disputa. Cores douradas, ensolaradas e de croma médio-alto. Qualquer coisa acinzentada ou azulada some no rosto.",
+    paleta:[["#F65E43","Coral"],["#F5872E","Tangerina"],["#F2C230","Amarelo ouro"],["#6FAE45","Verde grama"],["#22A6A0","Turquesa quente"],["#1E7FA3","Azul pavão"],["#D63A26","Vermelho tomate"],["#A05C2B","Canela"],["#F7E3AE","Creme manteiga"],["#8A9B33","Verde abacate"]],
+    neutros:[["#B9814A","Camelo"],["#E0C79C","Bege dourado"],["#6B4526","Café quente"],["#F7EFE0","Off-white quente"]],
+    evitar:[["#F2C9DA","Rosa gelo"],["#7C8C9B","Cinza azulado"],["#0F0F12","Preto"],["#A81E68","Magenta frio"]],
+    metal:"Ouro amarelo",
+    tecidos:"Naturais e com corpo: algodão, linho, camurça, tricô de fio médio",
+    estampa:"Média e alegre — étnica, floral desenhado, xadrez quente",
+    curinga:"Camelo #B9814A como neutro de peça-chave",
+    cabelo:[["#D6A94F","Loiro dourado"],["#B67C33","Mel"],["#A8501F","Ruivo cobre"],["#7A4A22","Castanho caramelo"]],
+    notaCabelo:"Reflexo dourado ou acobreado sempre. Matizador roxo em excesso puxa o tom para o frio e briga com a pele.",
+    batom:[["#EF5B42","Coral vivo"],["#DE6B3C","Terracota"],["#CE3823","Vermelho quente"],["#CE8A62","Nude damasco"]],
+    blush:[["#EE9A6C","Damasco"],["#EF7A5C","Coral"],["#DA7F5C","Terracota clara"]],
+    sombra:[["#C9932F","Ouro"],["#A9622E","Cobre"],["#6E7434","Oliva"],["#8A5F32","Bronze"]]
+  },
+  "primavera-brilhante": {
+    nome:"Primavera Brilhante", en:"Bright Spring", accent:"#D9412A",
+    eixos:{subtom:66,prof:44,int:94,contr:78},
+    desc:"Cor limpa e saturada, com calor por baixo e contraste alto. É a estação que aguenta — e pede — o tom mais vibrante da cartela. Cor empoeirada é o único inimigo real.",
+    paleta:[["#00B5B8","Turquesa vívida"],["#F63E7B","Pink vivo"],["#14B87A","Esmeralda claro"],["#FFD226","Amarelo vivo"],["#FF5B4A","Coral vibrante"],["#2C6BE0","Azul royal claro"],["#7B4FD6","Violeta"],["#E11A32","Cereja quente"],["#9ED41F","Verde limão"],["#45D3D9","Aqua"]],
+    neutros:[["#1B2E5A","Marinho quente"],["#FAF7F0","Off-white brilhante"],["#D9D9D6","Cinza claro"],["#C08A54","Camelo"]],
+    evitar:[["#A98B3E","Mostarda apagada"],["#8A7364","Marrom poeira"],["#8C857C","Cinza lama"],["#C39A9A","Rosa empoeirado"]],
+    metal:"Ouro polido ou prata polida — o que importa é o brilho",
+    tecidos:"De superfície limpa e lisa: cetim, popeline, couro liso, tricô fino",
+    estampa:"Gráfica e de alto contraste — bloco de cor, listra larga, geométrica",
+    curinga:"Marinho quente #1B2E5A no lugar do preto",
+    cabelo:[["#E0C177","Loiro claro brilhante"],["#7E5326","Castanho médio dourado"],["#B84A1E","Ruivo vivo"],["#4A2E17","Castanho escuro quente"]],
+    notaCabelo:"Cor limpa e uniforme rende mais que mechas quebradas. Meio-tom desbotado tira o brilho que sustenta o rosto.",
+    batom:[["#EE3D73","Pink quente"],["#FA5442","Coral vivo"],["#DC1F35","Cereja"],["#D62A5C","Framboesa"]],
+    blush:[["#F4657F","Pink coral"],["#FA6A55","Coral vivo"],["#E2617F","Framboesa clara"]],
+    sombra:[["#17A9AC","Turquesa"],["#7A54C8","Violeta"],["#E0B32E","Dourado brilhante"],["#12A46F","Esmeralda"]]
+  },
+  "verao-claro": {
+    nome:"Verão Claro", en:"Light Summer", accent:"#7E6FAE",
+    eixos:{subtom:34,prof:24,int:44,contr:24},
+    desc:"Fria com aparência neutra, muito clara e de contraste baixo. Vive de tons pastel com fundo azulado. Preto e cor forte cortam o rosto ao meio.",
+    paleta:[["#F1BFC8","Rosa pó"],["#A9C4DE","Azul pó"],["#C2B4DC","Lilás"],["#A9D6C4","Verde menta"],["#8FB6D6","Azul céu frio"],["#F0C6BA","Pêssego frio"],["#F1E3AE","Manteiga fria"],["#9AA8DA","Periwinkle"],["#D79FA8","Rosa antigo"],["#9CCFCF","Aqua suave"]],
+    neutros:[["#CFCFD4","Cinza pérola"],["#B4BEC7","Cinza azulado"],["#414F6E","Marinho suave"],["#F3F3F1","Off-white frio"]],
+    evitar:[["#0F0F12","Preto"],["#F5872E","Laranja"],["#A98B3E","Mostarda"],["#6B4526","Marrom terra"]],
+    metal:"Prata, ouro branco e ouro rosé claro",
+    tecidos:"Fluidos e de toque macio: viscose, seda leve, cashmere fino, algodão lavado",
+    estampa:"Aquarelada e de baixo contraste — floral desbotado, listra fina tom sobre tom",
+    curinga:"Marinho suave #414F6E no lugar do preto",
+    cabelo:[["#C8BB9D","Loiro cinza claro"],["#D6CDBA","Loiro pérola"],["#7E6E5F","Castanho claro acinzentado"],["#9C8A72","Loiro escuro frio"]],
+    notaCabelo:"Loiros frios e matizados. Fundo de clareamento amarelo-ouro precisa ser neutralizado ou a pele fica lavada.",
+    batom:[["#E28FA0","Rosa frio"],["#D897A8","Malva claro"],["#DDA0A2","Rosa nude"],["#C9718C","Framboesa suave"]],
+    blush:[["#EDA9B4","Rosa pó"],["#DDA0B2","Malva"],["#F0B5BC","Rosa frio claro"]],
+    sombra:[["#BDB2C9","Cinza lilás"],["#A8BED4","Azul pó"],["#D3B0B6","Rosa acinzentado"],["#9B9088","Taupe frio"]]
+  },
+  "verao-frio": {
+    nome:"Verão Frio", en:"True Summer", accent:"#35608F",
+    eixos:{subtom:12,prof:50,int:52,contr:50},
+    desc:"O frio é a característica dominante. Rosados, azulados e arroxeados de croma médio, com acabamento levemente empoeirado. Calor de qualquer tipo destoa na hora.",
+    paleta:[["#E06B94","Rosa frio"],["#35507F","Marinho suave"],["#2E7C99","Azul pavão frio"],["#3E9C82","Verde jade"],["#B06E96","Malva"],["#8A3B57","Borgonha suave"],["#6C89A6","Cinza azulado"],["#9C86BE","Lilás médio"],["#7FA894","Eucalipto"],["#CE7FA8","Orquídea"]],
+    neutros:[["#7E8C99","Cinza médio azulado"],["#2C3D63","Marinho"],["#C6C8CE","Cinza pérola"],["#F0F2F3","Branco frio"]],
+    evitar:[["#F5872E","Laranja"],["#F2C230","Amarelo ouro"],["#7A4A22","Marrom quente"],["#000000","Preto puro"]],
+    metal:"Prata",
+    tecidos:"De caimento macio e brilho contido: crepe, jersey, seda fosca, tricô de algodão",
+    estampa:"Suave e de contraste médio — floral médio, listra clássica, poá",
+    curinga:"Marinho #2C3D63 como o preto dela",
+    cabelo:[["#6A5344","Castanho médio frio"],["#8B7A64","Loiro escuro cinza"],["#52443B","Castanho acinzentado"],["#B9B7B4","Prata natural"]],
+    notaCabelo:"Reflexo cinza, pérola ou levemente violáceo. Grisalho assumido costuma cair muito bem aqui.",
+    batom:[["#DA5F86","Rosa frio"],["#C33F6B","Framboesa"],["#B96A8B","Malva"],["#93304F","Vinho suave"]],
+    blush:[["#E27E9C","Rosa frio"],["#C9799A","Malva"],["#DA6A8C","Framboesa clara"]],
+    sombra:[["#5E7A99","Azul ardósia"],["#9A85BC","Lilás"],["#B79AA3","Cinza rosado"],["#55917C","Jade suave"]]
+  },
+  "verao-suave": {
+    nome:"Verão Suave", en:"Soft Summer", accent:"#7C6474",
+    eixos:{subtom:32,prof:50,int:22,contr:22},
+    desc:"Fria com aparência neutra e croma baixo: a suavidade manda mais que a temperatura. Cor cinzenta, empoeirada, sem estridência. Saturação alta endurece o rosto na hora.",
+    paleta:[["#C9959C","Rosa empoeirado"],["#8397A8","Azul poeira"],["#93A691","Verde sálvia"],["#A48699","Malva acinzentado"],["#7C5C72","Ameixa suave"],["#6E8399","Jeans desbotado"],["#7E9A92","Eucalipto"],["#B39A94","Taupe rosado"],["#7E4756","Borgonha empoeirado"],["#A6A3B8","Cinza lavanda"]],
+    neutros:[["#8E877F","Taupe frio"],["#9A9B9C","Cinza médio"],["#3E4B62","Marinho suave"],["#EDEBE7","Off-white acinzentado"]],
+    evitar:[["#FFD226","Amarelo vivo"],["#F5872E","Laranja"],["#F63E7B","Pink choque"],["#000000","Preto puro"]],
+    metal:"Prata fosca e ouro escovado",
+    tecidos:"Foscos e de textura fechada: lã fria, jersey, camurça, algodão mesclado",
+    estampa:"Tom sobre tom, borrada — mescla, floral desfocado, listra irregular",
+    curinga:"Taupe frio #8E877F como base de tudo",
+    cabelo:[["#6B5B4F","Castanho médio acinzentado"],["#8E7D6B","Loiro escuro fumê"],["#4E3F36","Chocolate frio"],["#B5B2AC","Grisalho pérola"]],
+    notaCabelo:"Fugir de dourado e acobreado. Cor esfumada, sem linha de raiz marcada, e nada de contraste alto entre mecha e base.",
+    batom:[["#C4808C","Rosa mauve"],["#B05F76","Framboesa empoeirada"],["#C79A97","Nude rosado"],["#8A4C5C","Vinho suave"]],
+    blush:[["#CE9098","Rosa poeira"],["#BE8494","Mauve"],["#BC8078","Terracota fria"]],
+    sombra:[["#9C8C82","Taupe"],["#A29BB0","Cinza lavanda"],["#8D9C8B","Sálvia"],["#7A5E70","Ameixa suave"]]
+  },
+  "outono-suave": {
+    nome:"Outono Suave", en:"Soft Autumn", accent:"#9C7248",
+    eixos:{subtom:68,prof:52,int:22,contr:24},
+    desc:"Quente com aparência neutra e croma baixo. Cores de terra lavada, como se tivessem tomado sol por uma estação inteira. Nada saturado, nada gelado.",
+    paleta:[["#D69080","Salmão poeira"],["#8C8C5E","Oliva suave"],["#BE7A5A","Terracota suave"],["#C0A050","Mostarda suave"],["#90A07C","Sálvia quente"],["#C0965F","Camelo"],["#B96D62","Rosa tijolo"],["#4E7A7C","Petróleo suave"],["#8A5B58","Ameixa quente"],["#DCC49C","Bege dourado"]],
+    neutros:[["#9C8973","Taupe quente"],["#B99163","Camelo"],["#6E523C","Chocolate ao leite"],["#F2E9D9","Off-white cremoso"]],
+    evitar:[["#F63E7B","Pink choque"],["#2C6BE0","Azul royal"],["#0F0F12","Preto"],["#FFFFFF","Branco puro"]],
+    metal:"Ouro fosco e bronze escovado",
+    tecidos:"Rústicos e opacos: linho, camurça, tricô de lã, algodão encorpado",
+    estampa:"Orgânica e desbotada — animal print suave, folhagem, xadrez apagado",
+    curinga:"Camelo #B99163 em vez de bege genérico",
+    cabelo:[["#9C8055","Loiro escuro dourado fumê"],["#7C5B3C","Caramelo suave"],["#5E432D","Castanho médio quente"],["#A26A48","Ruivo poeira"]],
+    notaCabelo:"Reflexo quente, porém quebrado — nada de dourado puro nem de cobre vivo. Balayage sem linha dura funciona melhor que mechas separadas.",
+    batom:[["#C07A66","Nude terracota"],["#B86A5E","Rosa tijolo"],["#9C5A52","Marsala suave"],["#BC8464","Caramelo"]],
+    blush:[["#D89380","Pêssego poeira"],["#C87E66","Terracota"],["#CE8C7C","Rosa quente suave"]],
+    sombra:[["#9C7A52","Bronze fosco"],["#86864F","Oliva"],["#A08D77","Taupe quente"],["#7E5A50","Ameixa terra"]]
+  },
+  "outono-quente": {
+    nome:"Outono Quente", en:"True Autumn", accent:"#A8541F",
+    eixos:{subtom:90,prof:62,int:60,contr:50},
+    desc:"Calor pleno e terroso, de croma médio. Ferrugem, mostarda, musgo — a paleta inteira parece luz de fim de tarde. Rosa gelado e cinza azulado apagam o rosto.",
+    paleta:[["#B4501F","Ferrugem"],["#C99A22","Mostarda ouro"],["#6B7A2C","Verde musgo"],["#D2711E","Abóbora"],["#8A4B22","Canela"],["#55602A","Oliva escuro"],["#2C6668","Petróleo"],["#A83A24","Tijolo"],["#B87A38","Caramelo"],["#EBD49A","Creme milho"]],
+    neutros:[["#4E3220","Chocolate"],["#B58048","Camelo"],["#A99364","Khaki"],["#F3E8D4","Off-white quente"]],
+    evitar:[["#F2C9DA","Rosa gelo"],["#A9C4DE","Azul bebê"],["#8C939B","Cinza frio"],["#0F0F12","Preto"]],
+    metal:"Ouro amarelo, cobre e bronze",
+    tecidos:"De textura visível: tweed, suede, veludo cotelê, lã grossa, couro envelhecido",
+    estampa:"Rica e terrosa — paisley, folhagem, xadrez de outono, animal print",
+    curinga:"Chocolate #4E3220 no lugar do preto",
+    cabelo:[["#A0491A","Ruivo cobre"],["#6E3520","Acaju"],["#7A4E24","Castanho caramelo"],["#A8813E","Loiro escuro dourado"]],
+    notaCabelo:"É a estação que mais aguenta cobre e acaju reais. Loiro platinado e cinza cortam a harmonia inteira.",
+    batom:[["#B85832","Terracota"],["#A64228","Tijolo"],["#8E4A30","Marrom quente"],["#C4602A","Laranja queimado"]],
+    blush:[["#C97046","Terracota"],["#D08050","Damasco queimado"],["#B76048","Tijolo suave"]],
+    sombra:[["#A45E28","Cobre"],["#8A6030","Bronze"],["#6A742F","Musgo"],["#5A3A22","Chocolate"]]
+  },
+  "outono-profundo": {
+    nome:"Outono Profundo", en:"Deep Autumn", accent:"#7A2A1C",
+    eixos:{subtom:72,prof:82,int:66,contr:72},
+    desc:"Quente com aparência neutra, escura e densa. Vinho, garrafa, ferrugem queimada — cor com peso. Pastel some no rosto e deixa a cliente parecendo cansada.",
+    paleta:[["#6E1E28","Borgonha"],["#1F4A32","Verde garrafa"],["#8E3A17","Ferrugem escura"],["#46281A","Chocolate"],["#A8801C","Mostarda escura"],["#1C4A50","Petróleo escuro"],["#4E2038","Ameixa escura"],["#4A5220","Oliva escuro"],["#8A2E1E","Tijolo escuro"],["#C0561E","Laranja queimado"]],
+    neutros:[["#3A2318","Marrom escuro"],["#7A6A43","Khaki escuro"],["#2E1D14","Café"],["#EFE1C8","Creme quente"]],
+    evitar:[["#F1BFC8","Rosa pastel"],["#A9C4DE","Azul pó"],["#D3D6DA","Cinza claro frio"],["#C2B4DC","Lilás claro"]],
+    metal:"Ouro velho e bronze escuro",
+    tecidos:"Densos e com profundidade: veludo, lã encorpada, couro, brocado",
+    estampa:"Escura e rica — barroca, paisley profundo, xadrez de tom fechado",
+    curinga:"Café #2E1D14 como escuro-base no lugar do preto",
+    cabelo:[["#3A2317","Castanho escuro quente"],["#5A2416","Acaju profundo"],["#241610","Preto café"],["#47301E","Chocolate"]],
+    notaCabelo:"Base escura e uniforme, com reflexo quente só na luz. Iluminado claro demais quebra a densidade que sustenta o rosto.",
+    batom:[["#741F2E","Vinho"],["#8E3826","Marrom avermelhado"],["#6A1C2A","Borgonha"],["#9C4526","Terracota escura"]],
+    blush:[["#B05C3C","Terracota profunda"],["#944352","Vinho suave"],["#A34E32","Tijolo"]],
+    sombra:[["#6E4A22","Bronze escuro"],["#2A5238","Verde garrafa"],["#52243C","Ameixa"],["#3E2A1C","Chocolate"]]
+  },
+  "inverno-profundo": {
+    nome:"Inverno Profundo", en:"Deep Winter", accent:"#5C0F24",
+    eixos:{subtom:30,prof:88,int:74,contr:90},
+    desc:"Fria com aparência neutra, escura e de contraste altíssimo. Preto, bordô, esmeralda, marinho: cor de joia sobre fundo escuro. Cor apagada e quente derruba a estrutura.",
+    paleta:[["#0F0F12","Preto"],["#5C0F24","Bordô"],["#0B5236","Esmeralda escuro"],["#101B3C","Marinho"],["#3A1150","Roxo uva"],["#A4102C","Rubi"],["#123B7A","Safira"],["#143A2A","Pinho escuro"],["#8A0F52","Magenta escuro"],["#2B2E33","Carvão"]],
+    neutros:[["#0F0F12","Preto"],["#2B2E33","Cinza carvão"],["#FFFFFF","Branco puro"],["#79808A","Cinza médio frio"]],
+    evitar:[["#F5872E","Laranja"],["#FFB89A","Pêssego"],["#C99A22","Mostarda"],["#E0C79C","Bege quente"]],
+    metal:"Prata, ouro branco e platina",
+    tecidos:"De acabamento nítido: alfaiataria, cetim, couro liso, lã penteada",
+    estampa:"De alto contraste e desenho definido — geométrica, bicolor, xadrez preto e branco",
+    curinga:"Preto #0F0F12 junto ao rosto, sem medo",
+    cabelo:[["#14161C","Preto azulado"],["#2C2420","Castanho escuro frio"],["#35291F","Castanho café"],["#1C1420","Preto violeta"]],
+    notaCabelo:"Escuro e limpo. Iluminado quente e mechas caramelo tiram o contraste que é o eixo desta estação.",
+    batom:[["#6E122A","Vinho profundo"],["#A8102E","Rubi"],["#4E1236","Ameixa escura"],["#8A1140","Berry"]],
+    blush:[["#9E3352","Berry"],["#8E3A4E","Vinho suave"],["#A83A5A","Framboesa escura"]],
+    sombra:[["#33363D","Grafite"],["#431658","Roxo uva"],["#0E4E36","Esmeralda escura"],["#C7CCD2","Prata gelo"]]
+  },
+  "inverno-frio": {
+    nome:"Inverno Frio", en:"True Winter", accent:"#24479E",
+    eixos:{subtom:8,prof:62,int:78,contr:72},
+    desc:"O frio absoluto, com croma alto e contraste marcado. Azul royal, pink, esmeralda e vermelho de fundo azulado. Qualquer traço de amarelo na cor amarela a pele.",
+    paleta:[["#1F45B0","Azul royal"],["#D5177E","Pink magenta"],["#C40D3C","Vermelho frio"],["#0E8C5E","Esmeralda"],["#6A2BC0","Violeta"],["#9FD0E8","Azul gelo"],["#10593F","Verde pinho"],["#7A0F35","Borgonha frio"],["#EE4C97","Rosa choque"],["#D3D8DE","Cinza gelo"]],
+    neutros:[["#14224E","Marinho"],["#737C87","Cinza frio"],["#FFFFFF","Branco puro"],["#0F0F12","Preto"]],
+    evitar:[["#F5872E","Laranja"],["#B58048","Camelo"],["#6B7A2C","Verde musgo"],["#7A4A22","Marrom quente"]],
+    metal:"Prata e platina",
+    tecidos:"Lisos e de superfície fria: gabardine, cetim, seda pesada, malha compacta",
+    estampa:"Definida e contrastada — listra larga, geométrica, floral de fundo escuro",
+    curinga:"Branco puro #FFFFFF junto ao rosto",
+    cabelo:[["#1A1A1F","Preto frio"],["#3A322C","Castanho escuro cinza"],["#BDBCBA","Grisalho prata"],["#5A4F46","Castanho cinza médio"]],
+    notaCabelo:"Cor fria e sólida, ou grisalho prateado bem matizado. O meio-termo amarelado é o que não funciona.",
+    batom:[["#E0417C","Rosa frio vivo"],["#C41240","Vermelho frio"],["#7C1338","Vinho"],["#C81A72","Magenta"]],
+    blush:[["#E36592","Rosa frio"],["#CE3D6E","Framboesa"],["#B84268","Berry"]],
+    sombra:[["#1E3268","Marinho"],["#C3C8CE","Prata"],["#5E2CA8","Roxo"],["#0F7A54","Esmeralda"]]
+  },
+  "inverno-brilhante": {
+    nome:"Inverno Brilhante", en:"Bright Winter", accent:"#C60C28",
+    eixos:{subtom:34,prof:56,int:98,contr:96},
+    desc:"O brilho é a característica dominante, com frio logo atrás. Cor pura, elétrica, com contraste máximo entre claro e escuro. Cor suave e empoeirada simplesmente desaparece.",
+    paleta:[["#E00C2A","Vermelho verdadeiro"],["#1848D8","Azul royal vivo"],["#FF2E86","Pink choque"],["#00A86B","Esmeralda vivo"],["#00BCD1","Turquesa vívida"],["#7A1FD8","Roxo elétrico"],["#EFE531","Amarelo limão frio"],["#0F0F12","Preto"],["#FFFFFF","Branco puro"],["#A8DCF0","Azul gelo"]],
+    neutros:[["#0F0F12","Preto"],["#FFFFFF","Branco puro"],["#2B2E33","Cinza carvão"],["#DCE0E4","Cinza gelo"]],
+    evitar:[["#C99A22","Mostarda"],["#C0562E","Terracota"],["#6B7A2C","Oliva"],["#E0C79C","Bege quente"]],
+    metal:"Prata polida e ouro branco",
+    tecidos:"De brilho e nitidez: cetim, verniz, seda, malha de acabamento liso",
+    estampa:"Preto e branco com um pop de cor pura — gráfica, bloco, listra forte",
+    curinga:"Preto e branco juntos, na mesma peça",
+    cabelo:[["#16161A","Preto brilhante"],["#2E2622","Castanho escuro frio"],["#E4E2DC","Loiro platinado"],["#4E4239","Castanho médio frio"]],
+    notaCabelo:"Só os extremos: bem escuro e limpo, ou platinado sem fundo amarelo. Tom médio quebrado tira a força do rosto.",
+    batom:[["#DE1030","Vermelho vivo"],["#F42B84","Pink choque"],["#D01A78","Fúcsia"],["#8A1240","Vinho brilhante"]],
+    blush:[["#F2477F","Pink vivo"],["#D8305F","Framboesa"],["#F0526A","Coral frio"]],
+    sombra:[["#26282E","Preto grafite"],["#1E44C8","Azul royal"],["#0AA06C","Esmeralda"],["#CFD5DB","Prata gelo"]]
+  }
+};
+
+const ROSTOS = {
+  "oval":{nome:"Oval",
+    leitura:"Proporção equilibrada, testa levemente mais larga que o queixo, mandíbula suave.",
+    objetivo:"Preservar o equilíbrio — aqui o corte serve à textura e ao temperamento, não à correção.",
+    fazer:"Qualquer comprimento funciona. Decida pelo tipo de fio, pela rotina e pelo temperamento, não pelo formato.",
+    evitar:"Volume alto demais no topo somado a comprimento muito longo — alonga o que já está proporcional.",
+    franja:"Livre: reta, cortina ou lateral.",
+    sobrancelha:"Arco natural, leve, sem redesenho.",
+    decote:"Praticamente todos — V, canoa, redondo, quadrado.",
+    brinco:"Livre; use o brinco para reforçar o temperamento.",
+    contorno:"Mínimo. Só definir maçãs e iluminar o centro do rosto."},
+  "redondo":{nome:"Redondo",
+    leitura:"Largura próxima da altura, bochechas cheias, mandíbula pouco marcada, linhas curvas dominantes.",
+    objetivo:"Alongar verticalmente e introduzir ângulo onde tudo é curva.",
+    fazer:"Volume no topo, comprimento passando da linha da mandíbula, camadas longas e verticais, risca lateral profunda.",
+    evitar:"Chanel na altura do queixo com volume nas laterais, franja reta e cheia, cortes curtos e arredondados.",
+    franja:"Lateral longa ou cortina bem aberta.",
+    sobrancelha:"Arco mais anguloso, cauda definida e alongada.",
+    decote:"V, gota, U profundo — tudo que abre verticalmente.",
+    brinco:"Alongado: gota, pendente, barra reta.",
+    contorno:"Sombrear laterais das bochechas e mandíbula; iluminador em faixa vertical no centro do rosto."},
+  "quadrado":{nome:"Quadrado",
+    leitura:"Testa larga, mandíbula larga e angulosa, largura praticamente constante do alto ao queixo.",
+    objetivo:"Suavizar os ângulos sem apagar a força que eles dão ao rosto.",
+    fazer:"Camadas suaves a partir do queixo, ondas, textura em volta da mandíbula, risca lateral.",
+    evitar:"Corte reto exatamente na linha da mandíbula e cabelo colado com risca central rígida.",
+    franja:"Lateral, cortina ou desfiada — nunca reta e pesada.",
+    sobrancelha:"Arco suavemente arredondado, sem ponta angulosa.",
+    decote:"V, canoa arredondada, gota.",
+    brinco:"Curvo: argola, gota, redondo.",
+    contorno:"Sombrear os cantos da mandíbula e as laterais da testa; blush em diagonal para cima."},
+  "retangular":{nome:"Retangular / oblongo",
+    leitura:"Rosto nitidamente mais longo que largo, testa alta, queixo alongado.",
+    objetivo:"Encurtar visualmente e criar largura na altura das maçãs.",
+    fazer:"Franja, volume nas laterais, ondas na linha das maçãs, comprimento médio até a clavícula.",
+    evitar:"Comprimento muito longo e liso sem volume, volume concentrado no topo, risca central lisa.",
+    franja:"Sim — é o principal aliado. Reta ou cortina cheia.",
+    sobrancelha:"Traçado mais horizontal, arco baixo.",
+    decote:"Canoa, ombro a ombro, gola alta larga, redondo.",
+    brinco:"Curto e largo: botão, argola pequena.",
+    contorno:"Sombrear a linha alta da testa e a ponta do queixo; blush aplicado na horizontal."},
+  "triangular":{nome:"Triangular (base larga)",
+    leitura:"Testa mais estreita, mandíbula mais larga — o peso do rosto está embaixo.",
+    objetivo:"Ganhar volume acima da linha dos olhos e afinar a base.",
+    fazer:"Volume no topo e nas têmporas, camadas mais curtas em cima, comprimento até a clavícula, mechas claras na parte superior.",
+    evitar:"Volume na altura da mandíbula, cabelo preso e liso, bob curto terminando no maxilar.",
+    franja:"Lateral leve ou cortina, para ampliar a testa.",
+    sobrancelha:"Mais longa e definida, com arco marcado.",
+    decote:"V, gola alta, ombro a ombro — tudo que alarga a parte de cima.",
+    brinco:"Mais largo em cima e afinando embaixo.",
+    contorno:"Sombrear os cantos da mandíbula; iluminar testa e têmporas."},
+  "coracao":{nome:"Coração (triângulo invertido)",
+    leitura:"Testa larga, maçãs marcadas, queixo fino e pontudo.",
+    objetivo:"Equilibrar a largura da testa e dar peso visual na base.",
+    fazer:"Comprimento na altura do queixo ou abaixo com volume nas pontas, ondas na base, long bob.",
+    evitar:"Volume no topo, coque alto muito apertado, corte muito curto na nuca.",
+    franja:"Cortina ou lateral longa, quebrando a largura da testa.",
+    sobrancelha:"Arco suave, espessura média — sobrancelha muito grossa alarga mais a testa.",
+    decote:"Gola alta, canoa, decote quadrado.",
+    brinco:"Gota invertida — mais largo na parte de baixo.",
+    contorno:"Sombrear as laterais da testa; blush nas maçãs e iluminador no queixo."},
+  "losango":{nome:"Losango (diamante)",
+    leitura:"Testa estreita, maçãs no ponto mais largo do rosto, queixo afilado.",
+    objetivo:"Ampliar testa e queixo e suavizar a projeção das maçãs.",
+    fazer:"Volume no topo e nas pontas, franja, comprimento passando da linha do queixo.",
+    evitar:"Volume exatamente na linha das maçãs e cabelo puxado para trás sem nenhum volume.",
+    franja:"Cortina ou lateral, para dar largura à testa.",
+    sobrancelha:"Arco suave e cauda mais longa.",
+    decote:"Canoa, ombro a ombro, decote quadrado.",
+    brinco:"Redondo ou argola média.",
+    contorno:"Sombrear logo abaixo das maçãs; iluminar testa e queixo."}
+};
+
+const TEMPERAMENTOS = {
+  "sanguineo":{nome:"Sanguíneo",
+    perfil:"Comunicativa, expansiva, sociável. Gosta de ser vista e cansa rápido do que é sempre igual.",
+    linhas:"Curvas e movimento; formas circulares.",
+    cabelo:"Textura, ondas, volume e movimento. Cortes que se transformam com o dia.",
+    maquiagem:"Viva, com um ponto de brilho. Boca ou olhos em destaque, nunca os dois apagados.",
+    roupa:"Peças fluidas, estampa de escala maior, acessório visível.",
+    acabamento:"Brilho e leveza."},
+  "colerico":{nome:"Colérico",
+    perfil:"Determinada, objetiva, de decisão rápida. Quer resultado e não tem paciência com manutenção difícil.",
+    linhas:"Retas e diagonais; formas triangulares, ângulo marcado.",
+    cabelo:"Corte geométrico, linha definida, assimetria, franja com desenho claro.",
+    maquiagem:"Contorno definido: boca marcada ou delineado gráfico — um dos dois, com força.",
+    roupa:"Estrutura e alfaiataria, ombro marcado, poucas peças de presença forte.",
+    acabamento:"Matte ou acetinado, sem excesso de brilho."},
+  "melancolico":{nome:"Melancólico",
+    perfil:"Sensível, detalhista, introspectiva. Repara no acabamento e prefere discrição a impacto.",
+    linhas:"Verticais e delicadas; formas alongadas, curvas pequenas.",
+    cabelo:"Comprimentos longos, acabamento refinado, detalhe fino, volume contido.",
+    maquiagem:"Esfumado suave em tons próximos, pele natural, nada de linha dura.",
+    roupa:"Tecidos leves com caimento, detalhe discreto, estampa de escala pequena.",
+    acabamento:"Acetinado suave."},
+  "fleumatico":{nome:"Fleumático",
+    perfil:"Calma, discreta, constante. Valoriza conforto e rotina simples de manutenção.",
+    linhas:"Horizontais e estáveis; formas quadradas e equilibradas.",
+    cabelo:"Corte de manutenção fácil, linha horizontal, volume moderado, cor próxima da natural.",
+    maquiagem:"Nude bem executado, correção mínima, produto que resolve em poucos passos.",
+    roupa:"Peças atemporais, tecidos naturais, silhueta reta.",
+    acabamento:"Matte."}
+};
+
+/* ============================ estado ============================ */
+const SALAO = "Hair ID";
+const state = {
+  estacao:"verao-suave", rosto:"oval", temp:"melancolico", temp2:"fleumatico",
+  exemplo:true, eixosIA:null, leitura:null
+};
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function swatches(list, avoid){
+  return list.map(([hex,nome]) =>
+    `<div class="sw${avoid?" no":""}"><span class="chip" style="--c:${hex}"></span>` +
+    `<span class="sw-n">${esc(nome)}</span><span class="sw-h">${hex}</span></div>`
+  ).join("");
+}
+function recs(items){
+  return items.map(([src,txt,avoid]) =>
+    `<div class="rec${avoid?" avoid":""}"><span class="src">${esc(src)}</span><span class="txt">${esc(txt)}</span></div>`
+  ).join("");
+}
+
+/* ============================ render ============================ */
+function render(){
+  const e = ESTACOES[state.estacao], r = ROSTOS[state.rosto];
+  const t = TEMPERAMENTOS[state.temp], t2 = TEMPERAMENTOS[state.temp2];
+
+  document.documentElement.style.setProperty("--season-accent", e.accent);
+
+  /* 01 */
+  $("descEstacao").textContent = e.desc;
+  const ax = state.eixosIA || e.eixos;
+  $("axesOrigem").textContent = state.eixosIA
+    ? "Eixos lidos das fotos desta cliente — podem cair um pouco fora do centro da estação, e é normal."
+    : "Eixos de referência da estação. Envie as fotos para ler a posição desta cliente.";
+
+  const L = state.leitura;
+  $("leituraIA").hidden = !L;
+  if (L){
+    $("leituraIAlist").innerHTML = [
+      ["Proporções", L.proporcao],
+      ["Forma", L.forma],
+      ["Pele", L.pele],
+      ["Cabelo", L.cabeloNatural],
+      ["Olhos", L.olhos],
+      ["Linhas", L.linhas],
+      ["Luz da foto", L.luz],
+      ["Confiança", L.confianca]
+    ].filter(([,v]) => v).map(([k,v]) =>
+      `<div class="pair"><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("");
+  }
+  setAxis("Subtom","trkSubtom","valSubtom",ax.subtom,
+    "linear-gradient(90deg,#6B93C4,#B9BCC0,#E0A45C)",
+    ax.subtom<25?"Frio":ax.subtom<45?"Neutro-frio":ax.subtom<60?"Neutro":ax.subtom<78?"Neutro-quente":"Quente");
+  setAxis("Profundidade","trkProf","valProf",ax.prof,
+    "linear-gradient(90deg,#F2EFE9,#8E8A84,#1E1D1C)",
+    ax.prof<35?"Clara":ax.prof<65?"Média":"Escura");
+  setAxis("Intensidade","trkInt","valInt",ax.int,
+    `linear-gradient(90deg,#A8A29B,${e.accent})`,
+    ax.int<35?"Suave":ax.int<70?"Média":"Brilhante");
+  setAxis("Contraste","trkCon","valCon",ax.contr,
+    "linear-gradient(90deg,#9A9691,#5A5751,#1E1D1C)",
+    ax.contr<35?"Baixo":ax.contr<70?"Médio":"Alto");
+
+  /* 02 */
+  $("noteEstacao").textContent = e.en + " · 12 estações";
+  $("gPaleta").innerHTML  = swatches(e.paleta);
+  $("gNeutros").innerHTML = swatches(e.neutros);
+  $("gEvitar").innerHTML  = swatches(e.evitar, true);
+  $("vMetal").textContent   = e.metal;
+  $("vTecidos").textContent = e.tecidos;
+  $("vEstampa").textContent = e.estampa;
+  $("vRosto").textContent   = "Só cor da paleta a 30 cm do rosto — blusa, gola, lenço, brinco.";
+  $("vContraste").textContent = ax.contr<35 ? "Tons próximos entre si; sem quebra clara/escura forte."
+    : ax.contr<70 ? "Uma quebra por look, entre peça de cima e de baixo."
+    : "Contraste explícito claro/escuro — é o que sustenta o rosto.";
+  $("vCuringa").textContent = e.curinga;
+
+  /* 03 */
+  $("gCabelo").innerHTML = swatches(e.cabelo);
+  $("notaCabelo").textContent = e.notaCabelo;
+  $("recCabelo").innerHTML = recs([
+    ["Formato — corte", r.fazer],
+    ["Formato — franja", r.franja],
+    ["Temperamento — textura", t.cabelo],
+    ["Temperamento — acabamento", t2.acabamento + " (leitura secundária: " + t2.nome.toLowerCase() + ")"],
+    ["Evitar", r.evitar, true]
+  ]);
+
+  /* 04 */
+  $("gBatom").innerHTML  = swatches(e.batom);
+  $("gBlush").innerHTML  = swatches(e.blush);
+  $("gSombra").innerHTML = swatches(e.sombra);
+  $("recMaquiagem").innerHTML = recs([
+    ["Formato — contorno", r.contorno],
+    ["Formato — sobrancelha", r.sobrancelha],
+    ["Temperamento — intensidade", t.maquiagem],
+    ["Estação — regra de tom", "Batom e blush na mesma temperatura da paleta. Se a cor parece 'gritar' no rosto, o problema quase sempre é subtom, não intensidade."]
+  ]);
+
+  /* 05 */
+  $("recRoupa").innerHTML = recs([
+    ["Formato — decote", r.decote],
+    ["Formato — acessório", r.brinco],
+    ["Temperamento — silhueta", t.roupa],
+    ["Temperamento — linhas", t.linhas],
+    ["Estação — tecidos", e.tecidos],
+    ["Estação — estampa", e.estampa],
+    ["Estação — metal", e.metal]
+  ]);
+
+  /* 06 */
+  const nome = $("fCliente").value.trim() || "Cliente";
+  const data = $("fData").value;
+  $("pWho").textContent = nome;
+  $("pMeta").textContent = [SALAO, data ? data.split("-").reverse().join("/") : ""].filter(Boolean).join(" · ");
+  $("pRibbon").innerHTML = e.paleta.map(([hex]) => `<span style="background:${hex}"></span>`).join("");
+  $("pEstacao").textContent = e.nome;
+  $("pRosto").textContent   = r.nome;
+  $("pTemp").textContent    = t.nome + " / " + t2.nome;
+  $("pMetal").textContent   = e.metal;
+  $("pResumo").innerHTML = recs([
+    ["Leitura do rosto", r.leitura],
+    ["Objetivo visagístico", r.objetivo],
+    ["Perfil", t.perfil],
+    ["Primeira mudança", primeiraMudanca(e, ax)]
+  ]);
+
+  buildPrompts(e, r, t, t2, nome);
+  desenharPainel();
+}
+
+function primeiraMudanca(e, ax){
+  if (ax.contr >= 70) return "Trocar o que fica junto ao rosto por um tom escuro da paleta com branco ou cor pura ao lado — o contraste é o que mais muda a leitura aqui.";
+  if (ax.int <= 30)  return "Tirar de circulação as peças saturadas junto ao rosto e substituir por " + e.neutros[0][1].toLowerCase() + " — o ganho aparece antes de qualquer corte.";
+  if (ax.prof <= 30) return "Substituir o preto junto ao rosto por " + e.curinga.split(" no lugar")[0].split(" em vez")[0].toLowerCase() + " — é a troca de maior efeito imediato.";
+  return "Alinhar o reflexo do cabelo à temperatura da estação antes de mexer no corte: a cor errada anula um corte certo.";
+}
+
+function setAxis(rot, trkId, valId, v, grad, rotulo){
+  const trk = $(trkId);
+  trk.style.background = grad;
+  trk.querySelector(".mark").style.left = v + "%";
+  $(valId).textContent = rot + ": " + rotulo + " · " + v;
+}
+
+/* ============================ prompts ============================ */
+function buildPrompts(e, r, t, t2, nome){
+  const cores = e.paleta.map(([h,n]) => `${n} ${h}`).join(", ");
+  const cab   = e.cabelo.map(([h,n]) => `${n} ${h}`).join(", ");
+
+  $("txtPainel").value =
+`Painel de consultoria de imagem (mood board editorial), formato 4:5, para a estação ${e.nome} (${e.en}).
+Fundo neutro ${e.neutros[3][1].toLowerCase()} ${e.neutros[3][0]}, iluminação difusa e neutra, cor fiel, sem dominante de temperatura.
+
+Composição em quatro blocos organizados em grade limpa:
+1) Cartela de dez amostras de cor retangulares, lado a lado: ${cores}.
+2) Três mechas de cabelo sobre a superfície, nos tons: ${cab}.
+3) Três produtos de maquiagem abertos mostrando a cor real: batom ${e.batom[0][1]} ${e.batom[0][0]}, blush ${e.blush[0][1]} ${e.blush[0][0]}, sombra ${e.sombra[0][1]} ${e.sombra[0][0]}.
+4) Três recortes de tecido em ${e.tecidos.split(":").pop().trim()}, nas cores ${e.paleta[0][1]} ${e.paleta[0][0]} e ${e.paleta[1][1]} ${e.paleta[1][0]}, com joias em ${e.metal.toLowerCase()}.
+
+Direção: fotografia de produto suave, sombra curta, superfície fosca, espaçamento generoso, nada de texto na imagem.`;
+
+  $("txtPainelNeg").value =
+`texto ilegível, letras distorcidas, tipografia, marca d'água, logotipo, cores saturadas demais, dominante amarela, luz colorida, sombra colorida, colagem bagunçada, elementos sobrepostos, fundo estampado, HDR exagerado, vinheta, desfoque, ruído, baixa resolução, mãos, rosto humano deformado, reflexo espelhado, plástico brilhante`;
+
+  $("txtRetrato").value =
+`Retrato de beleza em plano médio, 4:5, de uma modelo genérica (não reproduz a cliente ${nome}).
+Formato de rosto: ${r.nome.toLowerCase()}. Estação de cor: ${e.nome}.
+
+Cabelo: ${e.cabelo[0][1].toLowerCase()} ${e.cabelo[0][0]}, ${r.fazer.toLowerCase()} ${t.cabelo.toLowerCase()}
+Franja: ${r.franja.toLowerCase()}
+Maquiagem: boca ${e.batom[0][1].toLowerCase()} ${e.batom[0][0]}, blush ${e.blush[0][1].toLowerCase()} ${e.blush[0][0]}, olhos em ${e.sombra[0][1].toLowerCase()} ${e.sombra[0][0]}. ${t.maquiagem}
+Sobrancelha: ${r.sobrancelha.toLowerCase()}
+Roupa: ${r.decote.split("—")[0].trim().toLowerCase()} em ${e.paleta[0][1].toLowerCase()} ${e.paleta[0][0]}, tecido ${e.tecidos.split(":").pop().trim()}
+Joias: ${e.metal.toLowerCase()}, ${r.brinco.toLowerCase()}
+
+Luz: suave, difusa e neutra, sem dominante de temperatura, para que as cores da paleta apareçam fiéis. Fundo liso em ${e.neutros[0][1].toLowerCase()} ${e.neutros[0][0]}. Pele com textura real, poros visíveis, nada de alisamento digital.`;
+
+  $("txtRetratoNeg").value =
+`pele plastificada, alisamento digital, olhos deformados, dentes deformados, mãos deformadas, membros extras, texto, marca d'água, logotipo, dominante amarela ou esverdeada, luz colorida, contraluz forte, sombra dura, filtro de rede social, saturação exagerada, HDR, maquiagem fora da paleta, batom laranja se a estação for fria, batom rosa gelado se a estação for quente, fundo poluído, corte na cabeça, baixa resolução`;
+}
+
+/* ============================ selects ============================ */
+function fillSelect(el, obj, val, onchange){
+  el.innerHTML = Object.entries(obj).map(([k,v]) =>
+    `<option value="${k}"${k===val?" selected":""}>${esc(v.nome)}</option>`).join("");
+  el.addEventListener("change", () => { onchange(el.value); marcarEditado(); render(); });
+}
+fillSelect($("selEstacao"), ESTACOES, state.estacao, v => state.estacao = v);
+fillSelect($("selRosto"),   ROSTOS,   state.rosto,   v => state.rosto   = v);
+fillSelect($("selTemp"),    TEMPERAMENTOS, state.temp,  v => state.temp  = v);
+fillSelect($("selTemp2"),   TEMPERAMENTOS, state.temp2, v => state.temp2 = v);
+
+["fCliente","fData"].forEach(id =>
+  $(id).addEventListener("input", () => { marcarEditado(); render(); }));
+
+function marcarEditado(){
+  if (state.exemplo){ state.exemplo = false; $("exampleBadge").style.display = "none"; }
+}
+
+$("btnNova").addEventListener("click", () => {
+  $("fCliente").value = "";
+  $("fData").value = new Date().toISOString().slice(0,10);
+  limparFotos();
+  $("aiStatus").textContent = "";
+  $("aiStatus").className = "ai-status";
+  state.eixosIA = null;
+  state.leitura = null;
+  state.exemplo = false;
+  $("exampleBadge").style.display = "none";
+  render();
+  $("fCliente").focus();
+});
+
+document.querySelectorAll("[data-copy]").forEach(b => {
+  b.addEventListener("click", async () => {
+    try{
+      await navigator.clipboard.writeText($(b.dataset.copy).value);
+      const o = b.textContent; b.textContent = "Copiado"; setTimeout(() => b.textContent = o, 1400);
+    }catch(err){
+      $(b.dataset.copy).select();
+    }
+  });
+});
+
+$("btnCopiarTudo").addEventListener("click", async () => {
+  const e = ESTACOES[state.estacao], r = ROSTOS[state.rosto], t = TEMPERAMENTOS[state.temp], t2 = TEMPERAMENTOS[state.temp2];
+  const txt =
+`DOSSIÊ — ${$("fCliente").value.trim() || "Cliente"}
+${[SALAO, $("fData").value].filter(Boolean).join(" · ")}
+
+ESTAÇÃO: ${e.nome} (${e.en})
+${e.desc}
+Paleta: ${e.paleta.map(([h,n]) => n + " " + h).join(", ")}
+Evitar: ${e.evitar.map(([h,n]) => n + " " + h).join(", ")}
+Metal: ${e.metal}
+Tecidos: ${e.tecidos}
+
+ROSTO: ${r.nome}
+${r.leitura}
+Objetivo: ${r.objetivo}
+Corte: ${r.fazer}
+Franja: ${r.franja}
+Evitar: ${r.evitar}
+Decote: ${r.decote}
+Contorno: ${r.contorno}
+
+TEMPERAMENTO: ${t.nome} / ${t2.nome}
+${t.perfil}
+Cabelo: ${t.cabelo}
+Maquiagem: ${t.maquiagem}
+Roupa: ${t.roupa}
+
+CABELO — cor: ${e.cabelo.map(([h,n]) => n + " " + h).join(", ")}
+${e.notaCabelo}
+
+MAQUIAGEM — boca: ${e.batom.map(([h,n]) => n + " " + h).join(", ")}
+blush: ${e.blush.map(([h,n]) => n + " " + h).join(", ")}
+olhos: ${e.sombra.map(([h,n]) => n + " " + h).join(", ")}`;
+  try{
+    await navigator.clipboard.writeText(txt);
+    const b = $("btnCopiarTudo"), o = b.textContent;
+    b.textContent = "Copiado"; setTimeout(() => b.textContent = o, 1400);
+  }catch(err){ /* área de transferência indisponível */ }
+});
+
+/* ============================ foto + análise ============================ */
+let fotos = [], maxFotos = 4;
+
+function limparFotos(){
+  fotos.forEach(f => URL.revokeObjectURL(f.url));
+  fotos = [];
+  Object.keys(AM).forEach(k => AM[k] = null);
+  armado = null; limpo = null;
+  pintarAmostras();
+  $("medStatus").textContent = "";
+  $("medir").hidden = true;
+  autoStatus("Envie uma foto de frente para começar.");
+  pintarThumbs();
+  desenharPainel();
+}
+function pintarThumbs(){
+  $("thumbs").innerHTML = fotos.map((f,i) =>
+    `<div class="thumb"><img src="${f.url}" alt="Foto ${i+1} da cliente">` +
+    `<button type="button" data-i="${i}" aria-label="Remover foto ${i+1}">&times;</button></div>`).join("");
+  $("btnAuto").disabled = !fotos.length;
+}
+function autoStatus(msg, erro){
+  const el = $("autoStatus");
+  el.textContent = msg;
+  el.className = "ai-status" + (erro ? " err" : "");
+}
+function receberArquivos(list){
+  const arr = Array.from(list || []);
+  let erro = "";
+  for (const f of arr){
+    if (fotos.length >= maxFotos){ erro = "Máximo de " + maxFotos + " fotos."; break; }
+    if (!/^image\/(jpeg|png|webp)$/.test(f.type)){ erro = "Use JPG, PNG ou WebP."; continue; }
+    const url = URL.createObjectURL(f);
+    const img = new Image();
+    const item = { file:f, url:url, img:img };
+    img.onload = () => { desenharPainel(); abrirLupa(); };
+    img.src = url;
+    fotos.push(item);
+  }
+  pintarThumbs();
+  desenharPainel();
+  abrirLupa();
+  if (erro) autoStatus(erro, true);
+  else autoStatus("Foto carregada. Clique em Ler rosto e cores.");
+}
+
+$("thumbs").addEventListener("click", ev => {
+  const b = ev.target.closest("button[data-i]");
+  if (!b) return;
+  const i = Number(b.dataset.i);
+  URL.revokeObjectURL(fotos[i].url);
+  fotos.splice(i,1);
+  pintarThumbs(); desenharPainel(); abrirLupa();
+});
+
+$("drop").addEventListener("click", () => $("file").click());
+$("drop").addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); $("file").click(); } });
+$("file").addEventListener("change", ev => { receberArquivos(ev.target.files); ev.target.value = ""; });
+["dragenter","dragover"].forEach(t => $("drop").addEventListener(t, ev => { ev.preventDefault(); $("drop").classList.add("over"); }));
+["dragleave","drop"].forEach(t => $("drop").addEventListener(t, ev => { ev.preventDefault(); $("drop").classList.remove("over"); }));
+$("drop").addEventListener("drop", ev => receberArquivos(ev.dataTransfer.files));
+
+/* ==================== colorimetria: medir a foto ==================== */
+const AM = { pele:null, cabelo:null, olhos:null, neutro:null };
+let armado = null, limpo = null;
+
+function srgbLin(v){ v/=255; return v <= 0.04045 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); }
+function rgbParaLab(r,g,b){
+  const R=srgbLin(r), G=srgbLin(g), B=srgbLin(b);
+  let X=(R*0.4124564+G*0.3575761+B*0.1804375)/0.95047;
+  let Y=(R*0.2126729+G*0.7151522+B*0.0721750);
+  let Z=(R*0.0193339+G*0.1191920+B*0.9503041)/1.08883;
+  const f=t => t>0.008856451 ? Math.cbrt(t) : (7.787037*t + 16/116);
+  const fx=f(X), fy=f(Y), fz=f(Z);
+  return { L:116*fy-16, a:500*(fx-fy), b:200*(fy-fz) };
+}
+const croma = L => Math.sqrt(L.a*L.a + L.b*L.b);
+const matiz = L => { let h = Math.atan2(L.b, L.a) * 180/Math.PI; return h < 0 ? h+360 : h; };
+const hex2 = n => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2,"0");
+const paraHex = c => "#" + hex2(c.r) + hex2(c.g) + hex2(c.b);
+const trava = (v,a,b) => Math.max(a, Math.min(b, v));
+
+function abrirLupa(){
+  const f = fotos[0];
+  $("medir").hidden = !f;
+  if (!f || !f.img.complete || !f.img.naturalWidth) return;
+  const cv = $("lupa"), W = 560;
+  const H = Math.max(1, Math.round(W * f.img.naturalHeight / f.img.naturalWidth));
+  cv.width = W; cv.height = H;
+  limpo = document.createElement("canvas");
+  limpo.width = W; limpo.height = H;
+  limpo.getContext("2d", { willReadFrequently:true }).drawImage(f.img, 0, 0, W, H);
+  redesenharLupa();
+}
+function redesenharLupa(){
+  if (!limpo) return;
+  const ctx = $("lupa").getContext("2d");
+  ctx.drawImage(limpo, 0, 0);
+  Object.keys(AM).forEach(k => {
+    const m = AM[k]; if (!m) return;
+    ctx.beginPath(); ctx.arc(m.x, m.y, 9, 0, Math.PI*2);
+    ctx.strokeStyle = "#FFFFFF"; ctx.lineWidth = 3; ctx.stroke();
+    ctx.strokeStyle = "#000000"; ctx.lineWidth = 1.4; ctx.stroke();
+  });
+}
+function amostrar(x, y){
+  const ctx = limpo.getContext("2d", { willReadFrequently:true }), n = 5;
+  const x0 = trava(x-n, 0, limpo.width-1), y0 = trava(y-n, 0, limpo.height-1);
+  const w = Math.min(n*2+1, limpo.width-x0), h = Math.min(n*2+1, limpo.height-y0);
+  const d = ctx.getImageData(x0, y0, w, h).data;
+  let r=0, g=0, b=0, c=0;
+  for (let i=0; i<d.length; i+=4){ r+=d[i]; g+=d[i+1]; b+=d[i+2]; c++; }
+  return { r:r/c, g:g/c, b:b/c, x, y };
+}
+function pintarAmostras(){
+  document.querySelectorAll(".am").forEach(btn => {
+    const m = AM[btn.dataset.am];
+    btn.style.setProperty("--c", m ? paraHex(m) : "transparent");
+    btn.setAttribute("aria-pressed", armado === btn.dataset.am ? "true" : "false");
+  });
+  $("btnMedir").disabled = !(AM.pele && AM.cabelo && AM.olhos);
+}
+document.querySelectorAll(".am").forEach(btn => btn.addEventListener("click", () => {
+  armado = armado === btn.dataset.am ? null : btn.dataset.am;
+  pintarAmostras();
+  $("medStatus").textContent = armado ? "Clique na foto para pegar a cor de " + armado + "." : "";
+  $("medStatus").className = "ai-status";
+}));
+$("lupa").addEventListener("click", ev => {
+  if (!armado || !limpo) return;
+  const r = ev.currentTarget.getBoundingClientRect();
+  const x = Math.round((ev.clientX - r.left) * limpo.width / r.width);
+  const y = Math.round((ev.clientY - r.top) * limpo.height / r.height);
+  AM[armado] = amostrar(x, y);
+  armado = null;
+  redesenharLupa(); pintarAmostras();
+  $("medStatus").textContent = AM.pele && AM.cabelo && AM.olhos
+    ? "Pronto — pode calcular." : "Faltam as amostras que ainda estão sem cor.";
+});
+
+function corrigirLuz(c, neutro){
+  if (!neutro) return { r:c.r, g:c.g, b:c.b };
+  const m = (neutro.r + neutro.g + neutro.b) / 3;
+  return { r: c.r * m / (neutro.r || 1), g: c.g * m / (neutro.g || 1), b: c.b * m / (neutro.b || 1) };
+}
+function medirEixos(){
+  const n = AM.neutro;
+  const cp = corrigirLuz(AM.pele, n), cc = corrigirLuz(AM.cabelo, n), co = corrigirLuz(AM.olhos, n);
+  const pele = rgbParaLab(cp.r, cp.g, cp.b);
+  const cab  = rgbParaLab(cc.r, cc.g, cc.b);
+  const olh  = rgbParaLab(co.r, co.g, co.b);
+
+  const h = matiz(pele);
+  const subtom = Math.round(trava((h - 30) / (80 - 30) * 100, 0, 100));
+  const prof   = Math.round(trava(100 - (0.42*pele.L + 0.58*cab.L), 0, 100));
+  const cr     = Math.max(croma(olh), croma(pele)*0.9, croma(cab));
+  const int    = Math.round(trava((cr - 8) / (32 - 8) * 100, 0, 100));
+  const contr  = Math.round(trava((Math.abs(pele.L - cab.L) * 0.75 + Math.abs(pele.L - olh.L) * 0.25) / 55 * 100, 0, 100));
+  return { eixos:{ subtom, prof, int, contr }, pele, cab, olh, h };
+}
+function estacaoMaisProxima(e){
+  const w = { subtom:1.25, prof:1.15, int:0.35, contr:1.30 };
+  let melhor = null, menor = Infinity;
+  Object.keys(ESTACOES).forEach(k => {
+    const x = ESTACOES[k].eixos;
+    const d = w.subtom*Math.pow(x.subtom-e.subtom,2) + w.prof*Math.pow(x.prof-e.prof,2)
+            + w.int*Math.pow(x.int-e.int,2) + w.contr*Math.pow(x.contr-e.contr,2);
+    if (d < menor){ menor = d; melhor = k; }
+  });
+  return { chave:melhor, dist:Math.sqrt(menor) };
+}
+function calcularEstacao(origem){
+  const m = medirEixos();
+  const r = estacaoMaisProxima(m.eixos);
+  const neutro = m.eixos.subtom >= 42 && m.eixos.subtom <= 58;
+  state.eixosIA = m.eixos;
+  state.estacao = r.chave;
+  $("selEstacao").value = r.chave;
+  state.leitura = Object.assign({}, state.leitura, {
+    pele: "L* " + m.pele.L.toFixed(0) + " · matiz " + m.h.toFixed(0) + "° · croma " + croma(m.pele).toFixed(0),
+    olhos: "L* " + m.olh.L.toFixed(0) + " · croma " + croma(m.olh).toFixed(0),
+    cabeloNatural: "L* " + m.cab.L.toFixed(0) + " · croma " + croma(m.cab).toFixed(0),
+    luz: AM.neutro ? "Corrigida pelo neutro" + (origem === "auto" ? " da esclera do olho." : " marcado na foto.") : "Sem referência neutra — o subtom depende do balanço de branco da foto.",
+    confianca: (r.dist < 30 && !neutro) ? "alta" : r.dist < 48 ? "média" : "baixa"
+  });
+  marcarEditado();
+  render();
+  const duvida = r.dist >= 48 || neutro;
+  $("medStatus").textContent = "Estação: " + ESTACOES[r.chave].nome +
+    (r.dist >= 48 ? " — ficou entre estações; confira no drapeado antes de fechar."
+     : neutro ? " — subtom neutro, o caso que mais pede drapeado." : ".");
+  $("medStatus").className = "ai-status" + (duvida ? " err" : "");
+  return { chave:r.chave, dist:r.dist, duvida };
+}
+$("btnMedir").addEventListener("click", () => calcularEstacao("manual"));
+
+/* ============ leitura automática: pontos faciais no navegador ============ */
+const G = (v, alvo, tol) => Math.exp(-Math.pow((v - alvo) / tol, 2));
+const dist2 = (a,b) => Math.hypot(a.x-b.x, a.y-b.y);
+function pt(lm, i, W, H){ return { x: lm[i].x*W, y: lm[i].y*H }; }
+function dentro(p, W, H){ return p.x >= 3 && p.y >= 3 && p.x < W-3 && p.y < H-3; }
+
+function medianaPorL(pts){
+  if (!pts.length) return null;
+  const arr = pts.map(p => ({ p, L: rgbParaLab(p.r,p.g,p.b).L }));
+  arr.sort((a,b) => a.L - b.L);
+  return arr[Math.floor(arr.length/2)].p;
+}
+function formatoDoRosto(g){
+  const notas = {
+    oval:       G(g.R,1.30,.13) * G(g.tF,.86,.10) * G(g.tJ,.79,.10),
+    redondo:    G(g.R,1.14,.11) * G(g.tJ,.86,.11),
+    quadrado:   G(g.R,1.20,.12) * G(g.tF,.92,.09) * G(g.tJ,.91,.09),
+    retangular: G(g.R,1.46,.13) * G(g.tJ,.84,.13),
+    triangular: G(g.R,1.26,.18) * G(g.tJ - g.tF,.13,.08),
+    coracao:    G(g.R,1.28,.16) * G(g.tF - g.tJ,.17,.09),
+    losango:    G(g.R,1.34,.15) * G(g.tF,.76,.08) * G(g.tJ,.75,.09)
+  };
+  return Object.entries(notas).sort((a,b) => b[1]-a[1]);
+}
+function temperamentoDoRosto(g){
+  const notas = {
+    colerico:    G(g.tJ,.90,.10) * G(g.ang,130,11),
+    sanguineo:   G(g.R,1.12,.12) * G(g.tJ,.85,.12),
+    melancolico: G(g.R,1.44,.14) * G(g.tF,.80,.11),
+    fleumatico:  G(g.R,1.26,.11) * G(g.ang,147,11) * G(Math.abs(g.tF-g.tJ),0,.10)
+  };
+  return Object.entries(notas).sort((a,b) => b[1]-a[1]);
+}
+
+async function lerRosto(){
+  if (!limpo){ autoStatus("Envie uma foto primeiro.", true); return; }
+  const btn = $("btnAuto");
+  btn.disabled = true;
+  autoStatus("Carregando o detector… na primeira vez demora alguns segundos.");
+  let det;
+  try{
+    det = await window.__hairIdVision();
+  }catch(err){
+    autoStatus("Não consegui carregar o detector facial. Confira a conexão, ou meça à mão nos botões abaixo.", true);
+    $("medir").hidden = false;
+    btn.disabled = false;
+    return;
+  }
+
+  autoStatus("Medindo o rosto…");
+  let res;
+  try{ res = det.detect(limpo); }
+  catch(err){ res = null; }
+  const lm = res && res.faceLandmarks && res.faceLandmarks[0];
+  if (!lm){
+    autoStatus("Não achei um rosto nesta foto. Use uma de frente, com o rosto inteiro visível — ou meça à mão abaixo.", true);
+    $("medir").hidden = false;
+    btn.disabled = false;
+    return;
+  }
+
+  const W = limpo.width, H = limpo.height;
+  const topo = pt(lm,10,W,H), queixo = pt(lm,152,W,H);
+  const comprimento = dist2(topo, queixo);
+  const macas   = dist2(pt(lm,234,W,H), pt(lm,454,W,H));
+  const mandib  = dist2(pt(lm,172,W,H), pt(lm,397,W,H));
+  const testa   = dist2(pt(lm,54,W,H),  pt(lm,284,W,H));
+  const gon = pt(lm,172,W,H), zig = pt(lm,234,W,H);
+  const v1 = { x: zig.x-gon.x, y: zig.y-gon.y }, v2 = { x: queixo.x-gon.x, y: queixo.y-gon.y };
+  const ang = Math.acos((v1.x*v2.x + v1.y*v2.y) / (Math.hypot(v1.x,v1.y)*Math.hypot(v2.x,v2.y) || 1)) * 180/Math.PI;
+  const g = { R: comprimento/macas, tF: testa/macas, tJ: mandib/macas, ang };
+
+  const fr = formatoDoRosto(g), tp = temperamentoDoRosto(g);
+  state.rosto = fr[0][0]; $("selRosto").value = fr[0][0];
+  state.temp  = tp[0][0]; $("selTemp").value  = tp[0][0];
+  state.temp2 = tp[1][0]; $("selTemp2").value = tp[1][0];
+
+  /* --- pele: várias bochechas, mediana por luminosidade --- */
+  const pontosPele = [50,280,425,205,117,346,101,330]
+    .map(i => pt(lm,i,W,H)).filter(p => dentro(p,W,H)).map(p => amostrar(p.x|0, p.y|0));
+  AM.pele = medianaPorL(pontosPele);
+
+  /* --- cabelo: sobe da testa até cruzar a fronteira com a pele --- */
+  const dir  = { x:(topo.x-queixo.x)/comprimento, y:(topo.y-queixo.y)/comprimento };
+  const perp = { x:-dir.y, y:dir.x };
+  const peleLab0 = rgbParaLab(AM.pele.r, AM.pele.g, AM.pele.b);
+  const achados = [];
+  for (const lat of [-0.34, -0.17, 0, 0.17, 0.34]){
+    for (let k = 0.03; k <= 0.46; k += 0.025){
+      const q = { x: topo.x + dir.x*comprimento*k + perp.x*comprimento*lat,
+                  y: topo.y + dir.y*comprimento*k + perp.y*comprimento*lat };
+      if (!dentro(q,W,H)) break;
+      const a = amostrar(q.x|0, q.y|0);
+      const lab = rgbParaLab(a.r, a.g, a.b);
+      if (Math.hypot(lab.L-peleLab0.L, lab.a-peleLab0.a, lab.b-peleLab0.b) > 20){ achados.push(a); break; }
+    }
+  }
+  AM.cabelo = medianaPorL(achados) || medianaPorL([amostrar(
+    Math.round(topo.x + dir.x*comprimento*0.14), Math.round(topo.y + dir.y*comprimento*0.14))]);
+
+  /* --- íris: anel em volta do centro, sem pupila nem reflexo --- */
+  let avisoIris = false;
+  if (lm.length >= 478){
+    const c = pt(lm,468,W,H);
+    const raio = Math.max(2.5, dist2(c, pt(lm,470,W,H)));
+    const anel = [0,60,120,180,240,300]
+      .map(a => ({ x: c.x + Math.cos(a*Math.PI/180)*raio*0.55, y: c.y + Math.sin(a*Math.PI/180)*raio*0.55 }))
+      .filter(p => dentro(p,W,H)).map(p => amostrar(p.x|0, p.y|0))
+      .map(p => ({ p, L: rgbParaLab(p.r,p.g,p.b).L })).sort((a,b) => a.L - b.L);
+    const meio = anel.slice(1, Math.max(2, anel.length-1));
+    AM.olhos = meio.length ? meio[Math.floor(meio.length/2)].p : null;
+
+    /* --- esclera como referência neutra --- */
+    const canto = pt(lm,33,W,H);
+    const es = amostrar(Math.round(c.x + (canto.x-c.x)*0.62), Math.round(c.y + (canto.y-c.y)*0.62));
+    const esLab = rgbParaLab(es.r, es.g, es.b);
+    AM.neutro = (esLab.L > 45 && croma(esLab) < 14) ? es : null;
+  } else avisoIris = true;
+
+  if (!AM.olhos){ avisoIris = true; AM.olhos = AM.pele; }
+
+  redesenharLupa(); pintarAmostras();
+  $("medir").hidden = false;
+
+  const dePele = rgbParaLab(AM.pele.r, AM.pele.g, AM.pele.b);
+  const deCab  = rgbParaLab(AM.cabelo.r, AM.cabelo.g, AM.cabelo.b);
+  const dE = Math.hypot(dePele.L-deCab.L, dePele.a-deCab.a, dePele.b-deCab.b);
+
+  state.leitura = {
+    proporcao: "altura/largura " + g.R.toFixed(2) + " · testa " + g.tF.toFixed(2) + " · mandíbula " + g.tJ.toFixed(2) + " · ângulo do maxilar " + ang.toFixed(0) + "°",
+    forma: ROSTOS[fr[0][0]].nome + " (segundo mais provável: " + ROSTOS[fr[1][0]].nome + ")",
+    linhas: TEMPERAMENTOS[tp[0][0]].linhas
+  };
+  const r = calcularEstacao("auto");
+
+  const avisos = [];
+  if (dE < 13) avisos.push("a amostra de cabelo saiu parecida demais com a pele — confira se ela caiu no fio mesmo");
+  if (avisoIris) avisos.push("não consegui isolar a íris; confira a amostra dos olhos");
+  if (!AM.neutro) avisos.push("não achei esclera limpa para corrigir a luz, então o subtom depende do balanço de branco da foto");
+  autoStatus(avisos.length
+    ? "Medido, com ressalvas: " + avisos.join("; ") + "."
+    : "Medido. Confira os círculos na foto e ajuste o que estiver fora.", avisos.length > 0);
+  btn.disabled = false;
+}
+$("btnAuto").addEventListener("click", lerRosto);
+
+/* ============================ painel (canvas) ============================ */
+const BW = 1080, BH = 1350, BS = 2, M = 54;
+const B_INK = "#1A1918", B_MUT = "#8A857E", B_RULE = "#E3E0DB";
+const F_ARCH = '"Archivo", Arial, sans-serif';
+const F_BOD  = '"Bodoni Moda", Georgia, serif';
+const F_MONO = '"IBM Plex Mono", monospace';
+
+/* larguras relativas em cinco estações do rosto: testa, têmporas, maçãs, mandíbula, queixo */
+const DIAGRAMA = {
+  oval:       {p:[0.80,0.94,1.00,0.86,0.52], alt:1.36, corte:1.30, franja:"cortina", volume:"neutro", cap:{c:"Comprimento livre", f:"Cortina ou lateral", v:"Equilibrado, sem excesso"}},
+  redondo:    {p:[0.86,0.98,1.00,0.92,0.64], alt:1.10, corte:1.64, franja:"lateral", volume:"topo", cap:{c:"Abaixo da mandíbula", f:"Lateral longa", v:"No topo, nunca nos lados"}},
+  quadrado:   {p:[0.94,0.98,1.00,0.98,0.84], alt:1.22, corte:1.18, franja:"lateral", volume:"base", cap:{c:"Na altura do queixo, com onda", f:"Lateral desfiada", v:"Nas pontas, longe do maxilar"}},
+  retangular: {p:[0.90,0.96,1.00,0.94,0.76], alt:1.58, corte:1.24, franja:"reta",    volume:"lados", cap:{c:"Médio, na clavícula", f:"Reta ou cortina cheia", v:"Nas laterais, não no topo"}},
+  triangular: {p:[0.72,0.82,0.92,1.00,0.82], alt:1.30, corte:1.42, franja:"cortina", volume:"topo", cap:{c:"Até a clavícula", f:"Cortina que abre a testa", v:"No topo e nas têmporas"}},
+  coracao:    {p:[1.00,0.98,0.92,0.70,0.38], alt:1.32, corte:1.36, franja:"cortina", volume:"base", cap:{c:"Do queixo para baixo", f:"Cortina longa", v:"Nas pontas, na base"}},
+  losango:    {p:[0.70,0.86,1.00,0.78,0.46], alt:1.40, corte:1.38, franja:"cortina", volume:"topo", cap:{c:"Passando do queixo", f:"Cortina ou lateral", v:"No topo e nas pontas"}},
+};
+const LARG_VOLUME = {
+  topo:  [1.34,1.24,1.14,1.10],
+  lados: [1.10,1.36,1.34,1.18],
+  base:  [1.06,1.14,1.28,1.42],
+  neutro:[1.16,1.24,1.24,1.20]
+};
+
+function curva(ctx, pts){
+  ctx.moveTo(pts[0][0], pts[0][1]);
+  for (let i = 1; i < pts.length - 1; i++){
+    const mx = (pts[i][0] + pts[i+1][0]) / 2, my = (pts[i][1] + pts[i+1][1]) / 2;
+    ctx.quadraticCurveTo(pts[i][0], pts[i][1], mx, my);
+  }
+  const u = pts[pts.length-1];
+  ctx.lineTo(u[0], u[1]);
+}
+function espelha(pts, cx){ return pts.map(([x,y]) => [2*cx - x, y]).reverse(); }
+
+function pathRosto(ctx, cx, topo, w, h, p){
+  const hw = w/2;
+  const dir = [
+    [cx, topo],
+    [cx + hw*0.52, topo + h*0.04],
+    [cx + hw*p[0], topo + h*0.16],
+    [cx + hw*p[1], topo + h*0.33],
+    [cx + hw*p[2], topo + h*0.53],
+    [cx + hw*p[3], topo + h*0.77],
+    [cx + hw*p[4], topo + h*0.90],
+    [cx, topo + h]
+  ];
+  ctx.beginPath();
+  curva(ctx, dir);
+  curva(ctx, espelha(dir, cx));
+  ctx.closePath();
+}
+function pathCabelo(ctx, cx, topo, w, h, d){
+  const hw = w/2, L = LARG_VOLUME[d.volume] || LARG_VOLUME.neutro, fim = topo + h*d.corte;
+  const dir = [
+    [cx, topo - h*0.05],
+    [cx + hw*0.62, topo - h*0.01],
+    [cx + hw*L[0], topo + h*0.18],
+    [cx + hw*L[1], topo + h*0.46],
+    [cx + hw*L[2], topo + h*0.76],
+    [cx + hw*L[3], fim]
+  ];
+  ctx.beginPath();
+  curva(ctx, dir);
+  ctx.lineTo(cx - hw*L[3], fim);
+  curva(ctx, espelha(dir, cx).slice(1));
+  ctx.closePath();
+}
+function pathFranja(ctx, cx, topo, w, h, tipo){
+  const hw = w/2;
+  ctx.beginPath();
+  if (tipo === "reta"){
+    ctx.moveTo(cx - hw*0.92, topo + h*0.05);
+    ctx.quadraticCurveTo(cx, topo - h*0.04, cx + hw*0.92, topo + h*0.05);
+    ctx.quadraticCurveTo(cx + hw*0.86, topo + h*0.24, cx, topo + h*0.26);
+    ctx.quadraticCurveTo(cx - hw*0.86, topo + h*0.24, cx - hw*0.92, topo + h*0.05);
+  } else if (tipo === "lateral"){
+    ctx.moveTo(cx - hw*0.96, topo + h*0.04);
+    ctx.quadraticCurveTo(cx, topo - h*0.05, cx + hw*0.98, topo + h*0.10);
+    ctx.quadraticCurveTo(cx + hw*0.70, topo + h*0.34, cx - hw*0.30, topo + h*0.24);
+    ctx.quadraticCurveTo(cx - hw*0.86, topo + h*0.18, cx - hw*0.96, topo + h*0.04);
+  } else {
+    ctx.moveTo(cx - hw*0.96, topo + h*0.04);
+    ctx.quadraticCurveTo(cx - hw*0.40, topo - h*0.04, cx - hw*0.06, topo + h*0.30);
+    ctx.quadraticCurveTo(cx - hw*0.62, topo + h*0.26, cx - hw*0.96, topo + h*0.04);
+    ctx.moveTo(cx + hw*0.96, topo + h*0.04);
+    ctx.quadraticCurveTo(cx + hw*0.40, topo - h*0.04, cx + hw*0.06, topo + h*0.30);
+    ctx.quadraticCurveTo(cx + hw*0.62, topo + h*0.26, cx + hw*0.96, topo + h*0.04);
+  }
+  ctx.closePath();
+}
+
+function diagrama(ctx, modo, x, y, w, h, key, accent){
+  const d = DIAGRAMA[key] || DIAGRAMA.oval;
+  const fw = w*0.50, fh = fw*d.alt, cx = x + w/2;
+  const topo = y + (h - fh*Math.max(1, d.corte))/2 + fh*0.06;
+
+  if (modo !== "franja"){
+    pathCabelo(ctx, cx, topo, fw, fh, d);
+    ctx.fillStyle = modo === "volume" ? accent + "26" : "#EFECE7";
+    ctx.fill();
+    ctx.strokeStyle = modo === "volume" ? accent : "#CFCAC3";
+    ctx.lineWidth = modo === "volume" ? 2 : 1.4;
+    ctx.stroke();
+  }
+  pathRosto(ctx, cx, topo, fw, fh, d.p);
+  ctx.fillStyle = "#FFFFFF"; ctx.fill();
+  ctx.strokeStyle = B_INK; ctx.lineWidth = 1.8; ctx.stroke();
+
+  if (modo === "franja"){
+    pathFranja(ctx, cx, topo, fw, fh, d.franja);
+    ctx.fillStyle = accent + "33"; ctx.fill();
+    ctx.strokeStyle = accent; ctx.lineWidth = 2; ctx.stroke();
+  }
+  if (modo === "corte"){
+    const fim = topo + fh*d.corte;
+    ctx.strokeStyle = accent; ctx.lineWidth = 2; ctx.setLineDash([6,5]);
+    ctx.beginPath(); ctx.moveTo(x + w*0.08, fim); ctx.lineTo(x + w*0.92, fim); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+}
+
+function linhas(ctx, texto, maxW){
+  const ws = String(texto || "").split(/\s+/).filter(Boolean);
+  const out = []; let l = "";
+  for (const w of ws){
+    const t = l ? l + " " + w : w;
+    if (ctx.measureText(t).width > maxW && l){ out.push(l); l = w; } else l = t;
+  }
+  if (l) out.push(l);
+  return out;
+}
+function texto(ctx, txt, x, y, maxW, lh, max){
+  let ls = linhas(ctx, txt, maxW);
+  if (max && ls.length > max){
+    ls = ls.slice(0, max);
+    let u = ls[max-1];
+    while (u && ctx.measureText(u + "…").width > maxW) u = u.slice(0,-1).trim();
+    ls[max-1] = u + "…";
+  }
+  ls.forEach((l,i) => ctx.fillText(l, x, y + i*lh));
+  return y + ls.length*lh;
+}
+function rotulo(ctx, txt, x, y, cor){
+  ctx.font = "600 12px " + F_ARCH;
+  ctx.fillStyle = cor || B_MUT;
+  ctx.letterSpacing = "1.8px";
+  ctx.fillText(txt, x, y);
+  ctx.letterSpacing = "0px";
+}
+function regua(ctx, x1, y, x2){
+  ctx.strokeStyle = B_RULE; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(x1, y + .5); ctx.lineTo(x2, y + .5); ctx.stroke();
+}
+function amostra(ctx, hex, nome, x, y, w, h, riscar){
+  ctx.fillStyle = hex; ctx.fillRect(x, y, w, h);
+  ctx.strokeStyle = "#00000018"; ctx.lineWidth = 1; ctx.strokeRect(x + .5, y + .5, w - 1, h - 1);
+  if (riscar){
+    ctx.strokeStyle = "#FFFFFFCC"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(x + 6, y + h - 6); ctx.lineTo(x + w - 6, y + 6); ctx.stroke();
+    ctx.strokeStyle = "#00000055";
+    ctx.beginPath(); ctx.moveTo(x + 6, y + 6); ctx.lineTo(x + w - 6, y + h - 6); ctx.stroke();
+  }
+  ctx.font = "500 13px " + F_ARCH; ctx.fillStyle = B_INK;
+  texto(ctx, nome, x, y + h + 17, w, 15, 1);
+  ctx.font = "400 11px " + F_MONO; ctx.fillStyle = B_MUT;
+  ctx.fillText(hex.toUpperCase(), x, y + h + 33);
+}
+function pontos(ctx, lista, x, y, r){
+  lista.forEach(([hex], i) => {
+    ctx.beginPath(); ctx.arc(x + r + i*(r*2 + 8), y + r, r, 0, Math.PI*2);
+    ctx.fillStyle = hex; ctx.fill();
+    ctx.strokeStyle = "#00000018"; ctx.lineWidth = 1; ctx.stroke();
+  });
+}
+function cobrir(ctx, img, x, y, w, h){
+  const ir = img.naturalWidth / img.naturalHeight, br = w / h;
+  let sw, sh, sx, sy;
+  if (ir > br){ sh = img.naturalHeight; sw = sh * br; sx = (img.naturalWidth - sw)/2; sy = 0; }
+  else { sw = img.naturalWidth; sh = sw / br; sx = 0; sy = (img.naturalHeight - sh) * 0.28; }
+  ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+  ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+  ctx.restore();
+}
+
+function desenharPainel(){
+  const cv = $("board"); if (!cv) return;
+  const ctx = cv.getContext("2d");
+  const e = ESTACOES[state.estacao], r = ROSTOS[state.rosto];
+  const t = TEMPERAMENTOS[state.temp], t2 = TEMPERAMENTOS[state.temp2];
+  const ax = state.eixosIA || e.eixos, A = e.accent;
+  const nome = $("fCliente").value.trim() || "Cliente";
+  const data = $("fData").value ? $("fData").value.split("-").reverse().join("/") : "";
+  const R = BW - M;
+
+  ctx.setTransform(BS, 0, 0, BS, 0, 0);
+  ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, BW, BH);
+  ctx.textBaseline = "alphabetic"; ctx.textAlign = "left";
+
+  /* cabeçalho */
+  ctx.font = "600 21px " + F_ARCH; ctx.fillStyle = B_INK;
+  ctx.letterSpacing = "3px"; ctx.fillText("HAIR ID", M, 54); ctx.letterSpacing = "0px";
+  ctx.font = "500 10px " + F_ARCH; ctx.fillStyle = B_MUT;
+  ctx.letterSpacing = "1.6px"; ctx.fillText("CONSULTORIA DE IMAGEM E VISAGISMO", M, 74); ctx.letterSpacing = "0px";
+  ctx.textAlign = "right";
+  ctx.font = "400 27px " + F_BOD; ctx.fillStyle = B_INK; ctx.fillText(nome, R, 58);
+  ctx.font = "400 11px " + F_MONO; ctx.fillStyle = B_MUT; ctx.fillText(data, R, 76);
+  ctx.textAlign = "left";
+  regua(ctx, M, 104, R);
+
+  /* 01 — diagnóstico */
+  const fotoX = 640, colW = fotoX - M - 34;
+  rotulo(ctx, "01  DIAGNÓSTICO", M, 138);
+  ctx.font = "400 46px " + F_BOD; ctx.fillStyle = B_INK;
+  let y = texto(ctx, e.nome, M, 190, colW, 50, 2);
+  ctx.font = "400 12px " + F_MONO; ctx.fillStyle = A;
+  ctx.fillText(e.en.toUpperCase(), M, y + 6);
+  y += 34;
+  ctx.font = "400 14px " + F_ARCH; ctx.fillStyle = "#4A4640";
+  y = texto(ctx, e.desc, M, y, colW, 21, 4) + 14;
+
+  [["FORMATO", r.nome],
+   ["TEMPERAMENTO", t.nome + " · " + t2.nome],
+   ["SUBTOM", ax.subtom < 25 ? "Frio" : ax.subtom < 45 ? "Neutro-frio" : ax.subtom < 60 ? "Neutro" : ax.subtom < 78 ? "Neutro-quente" : "Quente"],
+   ["CONTRASTE", ax.contr < 35 ? "Baixo" : ax.contr < 70 ? "Médio" : "Alto"]
+  ].forEach(([k,v]) => {
+    rotulo(ctx, k, M, y);
+    ctx.textAlign = "right";
+    ctx.font = "500 14px " + F_ARCH; ctx.fillStyle = B_INK;
+    ctx.fillText(v, M + colW, y);
+    ctx.textAlign = "left";
+    regua(ctx, M, y + 11, M + colW);
+    y += 32;
+  });
+
+  const f0 = fotos[0];
+  if (f0 && f0.img && f0.img.complete && f0.img.naturalWidth) cobrir(ctx, f0.img, fotoX, 130, R - fotoX, 380);
+  else {
+    ctx.fillStyle = "#F4F2EE"; ctx.fillRect(fotoX, 130, R - fotoX, 380);
+    ctx.font = "400 12px " + F_ARCH; ctx.fillStyle = B_MUT; ctx.textAlign = "center";
+    ctx.fillText("sem foto", fotoX + (R - fotoX)/2, 326); ctx.textAlign = "left";
+  }
+  regua(ctx, M, 540, R);
+
+  /* 02 — cores que favorecem */
+  rotulo(ctx, "02  CORES QUE FAVORECEM", M, 574, A);
+  const cw = (R - M - 4*11) / 5;
+  e.paleta.slice(0,10).forEach(([hex,n], i) =>
+    amostra(ctx, hex, n, M + (i%5)*(cw+11), 594 + Math.floor(i/5)*106, cw, 60));
+  regua(ctx, M, 812, R);
+
+  /* 03 — cores que não favorecem */
+  rotulo(ctx, "03  CORES QUE NÃO FAVORECEM", M, 846);
+  const ew = (R - M - 3*11) / 4;
+  e.evitar.slice(0,4).forEach(([hex,n], i) =>
+    amostra(ctx, hex, n, M + i*(ew+11), 866, ew, 52, true));
+  regua(ctx, M, 972, R);
+
+  /* 04 — linha do corte */
+  rotulo(ctx, "04  LINHA DO CORTE  ·  " + r.nome.toUpperCase(), M, 1006);
+  const dw = (R - M) / 3;
+  const dg = DIAGRAMA[state.rosto] || DIAGRAMA.oval;
+  [["corte","COMPRIMENTO", dg.cap.c],
+   ["franja","FRANJA", dg.cap.f],
+   ["volume","VOLUME", dg.cap.v]
+  ].forEach(([modo, cap, txt], i) => {
+    const x = M + i*dw;
+    diagrama(ctx, modo, x, 1018, dw - 14, 132, state.rosto, A);
+    ctx.font = "600 11px " + F_ARCH; ctx.fillStyle = A;
+    ctx.letterSpacing = "1.4px"; ctx.fillText(cap, x, 1172); ctx.letterSpacing = "0px";
+    ctx.font = "400 12px " + F_ARCH; ctx.fillStyle = "#4A4640";
+    texto(ctx, txt, x, 1191, dw - 20, 16, 3);
+  });
+  regua(ctx, M, 1246, R);
+
+  /* 05 — cabelo, maquiagem, metal */
+  const tw = (R - M) / 3;
+  [["CABELO", e.cabelo], ["MAQUIAGEM", e.batom.concat(e.blush.slice(0,1))]].forEach(([cap, lista], i) => {
+    rotulo(ctx, cap, M + i*tw, 1280);
+    pontos(ctx, lista.slice(0,4), M + i*tw, 1292, 11);
+  });
+  rotulo(ctx, "METAL", M + 2*tw, 1280);
+  ctx.font = "500 13px " + F_ARCH; ctx.fillStyle = B_INK;
+  texto(ctx, e.metal, M + 2*tw, 1308, tw - 10, 15, 1);
+
+  ctx.font = "400 10px " + F_ARCH; ctx.fillStyle = B_MUT;
+  ctx.fillText("Hair ID · referência de direção, não fórmula de coloração.", M, 1338);
+}
+
+function slug(s){
+  return String(s || "cliente").toLowerCase().normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "cliente";
+}
+$("btnBaixar").addEventListener("click", () => {
+  const btn = $("btnBaixar");
+  btn.disabled = true;
+  $("dlStatus").textContent = "Gerando o PNG…";
+  $("dlStatus").className = "ai-status";
+  $("board").toBlob(blob => {
+    try{
+      if (!blob) throw new Error("sem blob");
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "hair-id-" + slug($("fCliente").value) + ".png";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      $("dlStatus").textContent = "Painel salvo na pasta de downloads.";
+    }catch(err){
+      $("dlStatus").textContent = "Não foi possível gerar o PNG.";
+      $("dlStatus").className = "ai-status err";
+    }finally{ btn.disabled = false; }
+  }, "image/png");
+});
+
+/* ============================ boot ============================ */
+$("fData").value = new Date().toISOString().slice(0,10);
+render();
+
+if (document.fonts && document.fonts.load){
+  Promise.all([
+    document.fonts.load('400 46px "Bodoni Moda"'),
+    document.fonts.load('600 12px "Archivo"'),
+    document.fonts.load('500 14px "Archivo"'),
+    document.fonts.load('400 12px "IBM Plex Mono"')
+  ]).then(desenharPainel).catch(() => {});
+}
+
+abrirLupa();
+
+</script>
+<script type="module">
+import { FilesetResolver, FaceLandmarker } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/vision_bundle.mjs";
+let pronto = null;
+window.__hairIdVision = function(){
+  if (!pronto) pronto = (async () => {
+    const fs = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm");
+    return await FaceLandmarker.createFromOptions(fs, {
+      baseOptions: { modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task" },
+      runningMode: "IMAGE",
+      numFaces: 1
+    });
+  })();
+  return pronto;
+};
+</script>
+</body>
+</html>
