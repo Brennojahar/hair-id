@@ -842,10 +842,8 @@ const TEMPERAMENTOS = {
 
 /* ============================ estado ============================ */
 const SALAO = "Hair ID";
-const state = {
-  estacao:"verao-suave", rosto:"oval", temp:"melancolico", temp2:"fleumatico",
-  exemplo:true, eixosIA:null, leitura:null
-};
+const PADRAO = { estacao:"verao-suave", rosto:"oval", temp:"melancolico", temp2:"fleumatico" };
+const state = Object.assign({ exemplo:true, eixosIA:null, leitura:null }, PADRAO);
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -1044,14 +1042,21 @@ function marcarEditado(){
 $("btnNova").addEventListener("click", () => {
   $("fCliente").value = "";
   $("fData").value = new Date().toISOString().slice(0,10);
+
   limparFotos();
-  $("aiStatus").textContent = "";
-  $("aiStatus").className = "ai-status";
+
+  Object.assign(state, PADRAO);
   state.eixosIA = null;
   state.leitura = null;
-  state.exemplo = false;
-  $("exampleBadge").style.display = "none";
+  state.exemplo = true;
+  $("selEstacao").value = PADRAO.estacao;
+  $("selRosto").value   = PADRAO.rosto;
+  $("selTemp").value    = PADRAO.temp;
+  $("selTemp2").value   = PADRAO.temp2;
+  $("exampleBadge").style.display = "";
+
   render();
+  abrirLupa();
   $("fCliente").focus();
 });
 
@@ -1117,7 +1122,11 @@ function limparFotos(){
   armado = null; limpo = null;
   pintarAmostras();
   $("medStatus").textContent = "";
+  $("medStatus").className = "ai-status";
   $("medir").hidden = true;
+  const cv = $("lupa");
+  cv.getContext("2d").clearRect(0, 0, cv.width, cv.height);
+  cv.width = 1; cv.height = 1;
   autoStatus("Envie uma foto de frente para começar.");
   pintarThumbs();
   desenharPainel();
